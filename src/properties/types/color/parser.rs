@@ -1,4 +1,5 @@
 use nom::{le_u8, le_u16};
+use crate::common::parser::align;
 use super::*;
 
 named!(pub parse_rgb_color<RgbColor>,
@@ -53,5 +54,13 @@ named!(pub parse_ole_color<OleColor>,
         | parse_palette_ole_color
         | parse_rgb_ole_color
         | parse_system_ole_color
+    )
+);
+
+named_args!(pub aligned_ole_color<'a>(offset: &'a mut usize)<OleColor>,
+    do_parse!(
+        call!(align, offset, 4) >>
+        val: map!(parse_ole_color, |x| { *offset += 4; x }) >>
+        (val)
     )
 );

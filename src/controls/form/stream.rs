@@ -57,13 +57,81 @@ bitflags! {
 }
 
 bitflags! {
-    /// Specifies the size of an fmString and whether the string is compressed.
-    pub struct CountOfBytesWithCompressionFlag: u32 {
-        /// Specifies whether the string is compressed.
-        const COMPRESSION_FLAG = 0x80000000;
-        /// An unsigned integer that specifies the size of the string in bytes. The size of a compressed string is the size after compression.
-        const COUNT_OF_BYTES   = 0x7FFFFFFF;
-        /// An empty string
-        const EMPTY            = 0x00000000;
+    /// Specifies the properties of the SiteClassInfo that contains this ClassInfoPropMask that are
+    /// not set to the file format default.
+    ///
+    /// For each bit, a value of zero specifies that the corresponding property is the file format
+    /// default and is not stored in the file.
+    pub struct ClassInfoPropMask: u32 {
+        /// Specifies whether ExtraDataBlock.ClsID is stored in the SiteClassInfo that contains
+        /// this ClassInfoPropMask.
+        const CLS_ID            = 0x00000001;
+        /// Specifies whether ExtraDataBlock.DispEvent is stored in the SiteClassInfo that contains
+        /// this ClassInfoPropMask.
+        const DISP_EVENT        = 0x00000002;
+
+        /// Specifies whether ExtraDataBlock.DefaultProg is stored in the SiteClassInfo that
+        /// contains this ClassInfoPropMask.
+        const DEFAULT_PROC      = 0x00000008;
+        /// Specifies whether DataBlock.ClassTableFlags and DataBlock.VarFlags are stored in the
+        /// SiteClassInfo that contains this ClassInfoPropMask.
+        const CLASS_FLAGS       = 0x00000010;
+        /// Specifies whether DataBlock.CountOfMethods is stored in the SiteClassInfo that contains
+        /// this ClassInfoPropMask.
+        const COUNT_OF_METHODS  = 0x00000020;
+        /// Specifies whether DataBlock.DispidBind is stored in the SiteClassInfo that contains
+        /// this ClassInfoPropMask.
+        const DISPID_BIND       = 0x00000040;
+        /// Specifies whether DataBlock.GetBindIndex is stored in the SiteClassInfo that contains
+        /// this ClassInfoPropMask.
+        const GET_BIND_INDEX    = 0x00000080;
+        /// Specifies whether DataBlock.PutBindIndex is stored in the SiteClassInfo that contains
+        /// this ClassInfoPropMask.
+        const PUT_BIND_INDEX    = 0x00000100;
+        /// Specifies whether DataBlock.BindType is stored in the SiteClassInfo that contains this
+        /// ClassInfoPropMask.
+        const BIND_TYPE         = 0x00000200;
+        /// Specifies whether DataBlock.GetValueIndex is stored in the SiteClassInfo that contains
+        /// this ClassInfoPropMask.
+        const GET_VALUE_INDEX   = 0x00000400;
+        /// Specifies whether DataBlock.PutValueIndex is stored in the SiteClassInfo that contains
+        /// this ClassInfoPropMask.
+        const PUT_VALUE_INDEX   = 0x00000800;
+        /// Specifies whether DataBlock.ValueType is stored in the SiteClassInfo that contains this
+        /// ClassInfoPropMask.
+        const VALUE_TYPE        = 0x00001000;
+        /// Specifies whether DataBlock.DispidRowset is stored in the SiteClassInfo that contains
+        /// this ClassInfoPropMask.
+        const DISPID_ROWSET     = 0x00002000;
+        /// Specifies whether DataBlock.SetRowset is stored in the SiteClassInfo that contains this
+        /// ClassInfoPropMask.
+        const SET_ROWSET        = 0x00004000;
     }
+}
+
+bitflags! {
+    /// Specifies the type of this site or the count of sites with a following type
+    pub struct TypeOrCount: u8 {
+        /// Mask for the data part fo this field
+        const TYPE_OR_COUNT = 0x7F;
+        /// Flag fCount
+        const IS_COUNT      = 0x80;
+    }
+}
+
+#[repr(u8)]
+#[derive(Debug, Copy, Clone, FromPrimitive, ToPrimitive)]
+/// The type of a concrete site
+pub enum SiteType {
+    /// An OleSiteConcrete
+    Ole = 0x01,
+}
+
+/// The depth and type of a site
+#[derive(Debug, Copy, Clone)]
+pub struct SiteDepthAndType {
+    /// The depth of the site
+    pub depth: u8,
+    /// The type of the site
+    pub r#type: SiteType,
 }

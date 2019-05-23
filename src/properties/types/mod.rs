@@ -5,6 +5,7 @@ pub mod color;
 pub mod font;
 pub mod picture;
 pub mod parser;
+pub mod string;
 
 /// An unsigned integer that specifies the type of icon displayed as the mouse pointer for the control.
 #[derive(Debug, FromPrimitive, ToPrimitive)]
