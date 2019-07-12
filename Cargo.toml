@@ -1,16 +1,17 @@
 [package]
 name = "ms-oforms"
-version = "0.2.0"
+version = "0.3.0-alpha1"
 authors = ["Xiphoseer"]
 edition = "2018"
 description = "Parser and Datastructures for [MS-OFORMS]"
 license = "MIT"
 repository = "https://github.com/xiphoseer/rust-ms-oforms"
+readme = "README.md"
 
 [dependencies]
 bitflags = "1.0"
-nom-methods = "0.1"
-nom = "4.2"
+nom-methods = "0.2"
+nom = "5.0"
 num-traits = "0.2"
 num-derive = "0.2"
 encoding = "0.2"

@@ -13,6 +13,7 @@
 
 #[macro_use]
 extern crate bitflags;
+extern crate nom_methods;
 #[macro_use]
 extern crate nom;
 #[macro_use]

@@ -1,4 +1,4 @@
-use nom::{le_u32, le_i32};
+use nom::number::complete::{le_u32, le_i32};
 use super::{Size, Position};
 
 named!(pub parse_size<Size>,
