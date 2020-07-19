@@ -261,7 +261,7 @@ pub fn parse_sites(
         result.push(site);
         data = rest;
     }
-    return Ok((data, result));
+    Ok((data, result))
 }
 
 pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {

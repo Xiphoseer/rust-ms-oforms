@@ -59,9 +59,9 @@ pub trait AlignedOleSiteParser: AlignedParser {
         flag: SitePropMask,
     ) -> IResult<&'a [u8], i32> {
         if mask.contains(flag) {
-            return self.le_i32(input);
+            self.le_i32(input)
         } else {
-            return Ok((input, 0x00000000));
+            Ok((input, 0x00000000))
         }
     }
 
@@ -73,9 +73,9 @@ pub trait AlignedOleSiteParser: AlignedParser {
         default: u32,
     ) -> IResult<&'a [u8], u32> {
         if mask.contains(flag) {
-            return self.le_u32(input);
+            self.le_u32(input)
         } else {
-            return Ok((input, default));
+            Ok((input, default))
         }
     }
 
@@ -87,9 +87,9 @@ pub trait AlignedOleSiteParser: AlignedParser {
         default: u16,
     ) -> IResult<&'a [u8], u16> {
         if mask.contains(flag) {
-            return self.le_u16(input);
+            self.le_u16(input)
         } else {
-            return Ok((input, default));
+            Ok((input, default))
         }
     }
 
@@ -101,9 +101,9 @@ pub trait AlignedOleSiteParser: AlignedParser {
         default: i16,
     ) -> IResult<&'a [u8], i16> {
         if mask.contains(flag) {
-            return self.le_i16(input);
+            self.le_i16(input)
         } else {
-            return Ok((input, default));
+            Ok((input, default))
         }
     }
 
@@ -117,9 +117,9 @@ pub trait AlignedOleSiteParser: AlignedParser {
         if mask.contains(flag) {
             let (input, s) = parse_string(input, length_and_compression)?;
             self.inc(s.len());
-            return Ok((input, s));
+            Ok((input, s))
         } else {
-            return Ok((input, String::from("")));
+            Ok((input, String::from("")))
         }
     }
 
