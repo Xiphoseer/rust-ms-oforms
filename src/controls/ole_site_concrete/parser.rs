@@ -1,13 +1,12 @@
-use nom::{IResult};
-use nom::number::complete::{le_u16};
-use nom::combinator::{map_opt, map};
-use crate::properties::types::string::{
-    stream::CountOfBytesWithCompressionFlag,
-    parser::parse_string,
-};
-use crate::common::parser::*;
-use super::*;
 use super::stream::*;
+use super::*;
+use crate::common::parser::*;
+use crate::properties::types::string::{
+    parser::parse_string, stream::CountOfBytesWithCompressionFlag,
+};
+use nom::combinator::{map, map_opt};
+use nom::number::complete::le_u16;
+use nom::IResult;
 
 use std::cell::Cell;
 
@@ -20,30 +19,45 @@ named!(pub parse_ole_site_concrete_header<u16>,
 );
 
 pub trait AlignedOleSiteParser: AlignedParser {
-    fn parse_cobwcf<'a>(&self, input: &'a [u8], mask: SitePropMask, flag: SitePropMask)
-    -> IResult<&'a [u8], CountOfBytesWithCompressionFlag> {
+    fn parse_cobwcf<'a>(
+        &self,
+        input: &'a [u8],
+        mask: SitePropMask,
+        flag: SitePropMask,
+    ) -> IResult<&'a [u8], CountOfBytesWithCompressionFlag> {
         if mask.contains(flag) {
-            map_opt(|i| self.le_u32(i), CountOfBytesWithCompressionFlag::from_bits)(input)
+            map_opt(
+                |i| self.le_u32(i),
+                CountOfBytesWithCompressionFlag::from_bits,
+            )(input)
         } else {
             Ok((input, CountOfBytesWithCompressionFlag::EMPTY))
         }
     }
 
-    fn parse_clsid_cache_index<'a>(&self, input: &'a [u8], mask: SitePropMask, flag: SitePropMask)
-    -> IResult<&'a [u8], ClsidCacheIndex> {
+    fn parse_clsid_cache_index<'a>(
+        &self,
+        input: &'a [u8],
+        mask: SitePropMask,
+        flag: SitePropMask,
+    ) -> IResult<&'a [u8], ClsidCacheIndex> {
         if mask.contains(flag) {
             let (input, bits) = self.le_u16(input)?;
             match ClsidCacheIndex::from_bits(bits) {
                 Some(x) => Ok((input, x)),
-                None => Ok((input, ClsidCacheIndex::INVALID))
+                None => Ok((input, ClsidCacheIndex::INVALID)),
             }
         } else {
             Ok((input, ClsidCacheIndex::INVALID))
         }
     }
 
-    fn parse_id<'a>(&self, input: &'a [u8], mask: SitePropMask, flag: SitePropMask)
-    -> IResult<&'a [u8], i32> {
+    fn parse_id<'a>(
+        &self,
+        input: &'a [u8],
+        mask: SitePropMask,
+        flag: SitePropMask,
+    ) -> IResult<&'a [u8], i32> {
         if mask.contains(flag) {
             return self.le_i32(input);
         } else {
@@ -51,8 +65,13 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_u32<'a>(&self, input: &'a [u8], mask: SitePropMask, flag: SitePropMask, default: u32)
-    -> IResult<&'a [u8], u32> {
+    fn parse_u32<'a>(
+        &self,
+        input: &'a [u8],
+        mask: SitePropMask,
+        flag: SitePropMask,
+        default: u32,
+    ) -> IResult<&'a [u8], u32> {
         if mask.contains(flag) {
             return self.le_u32(input);
         } else {
@@ -60,8 +79,13 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_u16<'a>(&self, input: &'a [u8], mask: SitePropMask, flag: SitePropMask, default: u16)
-    -> IResult<&'a [u8], u16> {
+    fn parse_u16<'a>(
+        &self,
+        input: &'a [u8],
+        mask: SitePropMask,
+        flag: SitePropMask,
+        default: u16,
+    ) -> IResult<&'a [u8], u16> {
         if mask.contains(flag) {
             return self.le_u16(input);
         } else {
@@ -69,8 +93,13 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_i16<'a>(&self, input: &'a [u8], mask: SitePropMask, flag: SitePropMask, default: i16)
-    -> IResult<&'a [u8], i16> {
+    fn parse_i16<'a>(
+        &self,
+        input: &'a [u8],
+        mask: SitePropMask,
+        flag: SitePropMask,
+        default: i16,
+    ) -> IResult<&'a [u8], i16> {
         if mask.contains(flag) {
             return self.le_i16(input);
         } else {
@@ -78,25 +107,34 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_str<'a>(&self, input: &'a [u8], mask: SitePropMask, flag: SitePropMask, length_and_compression: CountOfBytesWithCompressionFlag)
-    -> IResult<&'a [u8], String> {
+    fn parse_str<'a>(
+        &self,
+        input: &'a [u8],
+        mask: SitePropMask,
+        flag: SitePropMask,
+        length_and_compression: CountOfBytesWithCompressionFlag,
+    ) -> IResult<&'a [u8], String> {
         if mask.contains(flag) {
             let (input, s) = parse_string(input, length_and_compression)?;
             self.inc(s.len());
-            return Ok((input,s));
+            return Ok((input, s));
         } else {
-            return Ok((input,String::from("")))
+            return Ok((input, String::from("")));
         }
     }
 
-    fn parse_position<'a>(&self, input: &'a [u8], mask: SitePropMask, flag: SitePropMask)
-    -> IResult<&'a [u8], Position> {
+    fn parse_position<'a>(
+        &self,
+        input: &'a [u8],
+        mask: SitePropMask,
+        flag: SitePropMask,
+    ) -> IResult<&'a [u8], Position> {
         if mask.contains(flag) {
             let (input, top) = self.le_i32(input)?;
             let (input, left) = self.le_i32(input)?;
-            Ok((input, Position{top, left}))
+            Ok((input, Position { top, left }))
         } else {
-            Ok((input, Position{top: 0, left: 0}))
+            Ok((input, Position { top: 0, left: 0 }))
         }
     }
 }
@@ -104,7 +142,6 @@ pub trait AlignedOleSiteParser: AlignedParser {
 impl<T> AlignedOleSiteParser for T where T: AlignedParser {}
 
 pub fn parse_ole_site_concrete(input: &[u8]) -> IResult<&[u8], OleSiteConcrete> {
-
     let ap = Cell::new(0);
     let _i = input;
 
@@ -128,17 +165,21 @@ pub fn parse_ole_site_concrete(input: &[u8]) -> IResult<&[u8], OleSiteConcrete> 
     let (_i, bit_flags) = if mask.contains(SitePropMask::BIT_FLAGS) {
         map_opt(|i| ap.le_u32(i), SiteFlags::from_bits)(_i)?
     } else {
-        (_i, SiteFlags::TAB_STOP | SiteFlags::VISIBLE | SiteFlags::STREAMED | SiteFlags::AUTO_SIZE)
+        (
+            _i,
+            SiteFlags::TAB_STOP | SiteFlags::VISIBLE | SiteFlags::STREAMED | SiteFlags::AUTO_SIZE,
+        )
     };
 
     // Object Stream Size
-    let (_i, object_stream_size) = ap.parse_u32(_i, mask, SitePropMask::OBJECT_STREAM_SIZE, 0x00000000)?;
+    let (_i, object_stream_size) =
+        ap.parse_u32(_i, mask, SitePropMask::OBJECT_STREAM_SIZE, 0x00000000)?;
     // Tab Index
     let (_i, tab_index) = ap.parse_i16(_i, mask, SitePropMask::TAB_INDEX, -1)?;
     // CLSID Cache Index
     let (_i, clsid_cache_index) = map(
         |i| ap.parse_clsid_cache_index(i, mask, SitePropMask::CLSID_CACHE_INDEX),
-        Clsid::from
+        Clsid::from,
     )(_i)?;
 
     // Group ID
@@ -159,21 +200,45 @@ pub fn parse_ole_site_concrete(input: &[u8]) -> IResult<&[u8], OleSiteConcrete> 
     let (_i, site_position) = ap.parse_position(_i, mask, SitePropMask::POSITION)?;
 
     ap.align(_i, 4)?;
-    let (_i, control_tip_text) = ap.parse_str(_i, mask, SitePropMask::CONTROL_TIP_TEXT, control_tip_text_data)?;
+    let (_i, control_tip_text) = ap.parse_str(
+        _i,
+        mask,
+        SitePropMask::CONTROL_TIP_TEXT,
+        control_tip_text_data,
+    )?;
 
     ap.align(_i, 4)?;
-    let (_i, runtime_lic_key) = ap.parse_str(_i, mask, SitePropMask::RUNTIME_LIC_KEY, runtime_lic_key_data)?;
+    let (_i, runtime_lic_key) = ap.parse_str(
+        _i,
+        mask,
+        SitePropMask::RUNTIME_LIC_KEY,
+        runtime_lic_key_data,
+    )?;
 
     ap.align(_i, 4)?;
-    let (_i, control_source) = ap.parse_str(_i, mask, SitePropMask::CONTROL_SOURCE, control_source_data)?;
+    let (_i, control_source) =
+        ap.parse_str(_i, mask, SitePropMask::CONTROL_SOURCE, control_source_data)?;
 
     ap.align(_i, 4)?;
     let (_i, row_source) = ap.parse_str(_i, mask, SitePropMask::ROW_SOURCE, row_source_data)?;
 
-    Ok((_i, OleSiteConcrete {
-        id, help_context_id, bit_flags, object_stream_size,
-        tab_index, clsid_cache_index, group_id,
-        name, tag, site_position, control_tip_text, runtime_lic_key,
-        control_source, row_source,
-    }))
+    Ok((
+        _i,
+        OleSiteConcrete {
+            id,
+            help_context_id,
+            bit_flags,
+            object_stream_size,
+            tab_index,
+            clsid_cache_index,
+            group_id,
+            name,
+            tag,
+            site_position,
+            control_tip_text,
+            runtime_lic_key,
+            control_source,
+            row_source,
+        },
+    ))
 }

@@ -1,5 +1,5 @@
-use nom::number::complete::{le_u32, le_i32};
-use super::{Size, Position};
+use super::{Position, Size};
+use nom::number::complete::{le_i32, le_u32};
 
 named!(pub parse_size<Size>,
     do_parse!(

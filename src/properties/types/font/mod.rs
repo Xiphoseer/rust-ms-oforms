@@ -3,14 +3,10 @@ pub mod parser;
 use crate::common::GUID;
 
 #[derive(Debug)]
-pub struct StdFont {
-
-}
+pub struct StdFont {}
 
 #[derive(Debug)]
-pub struct TextProps {
-
-}
+pub struct TextProps {}
 
 #[derive(Debug)]
 pub enum FormFont {
@@ -27,5 +23,8 @@ pub struct GuidAndFont {
 }
 
 impl GuidAndFont {
-    pub const EMPTY: Self = GuidAndFont{ guid: GUID::EMPTY, font: FormFont::Empty};
+    pub const EMPTY: Self = GuidAndFont {
+        guid: GUID::EMPTY,
+        font: FormFont::Empty,
+    };
 }

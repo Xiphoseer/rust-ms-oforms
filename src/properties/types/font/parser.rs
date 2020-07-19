@@ -1,5 +1,5 @@
-use crate::common::{/*GUID, */parser::*};
 use super::*;
+use crate::common::parser::*;
 use nom::number::complete::{le_u16, le_u32};
 
 named!(pub parse_guid_and_font<GuidAndFont>,

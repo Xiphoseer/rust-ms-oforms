@@ -1,5 +1,5 @@
 use super::stream::*;
-use encoding::{Encoding, DecoderTrap, all::UTF_16LE};
+use encoding::{all::UTF_16LE, DecoderTrap, Encoding};
 use std::borrow::Cow;
 
 fn parse_str(bytes: &[u8], compressed: bool) -> Result<String, Cow<'static, str>> {

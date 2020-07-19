@@ -1,10 +1,10 @@
 //! Specifies properties stored for each embedded control in a UserForm control.
-pub mod stream;
 pub mod parser;
+pub mod stream;
 
 use crate::properties::types::Position;
 
-bitflags!{
+bitflags! {
     /// Specifies Boolean properties of an embedded control on a form.
     ///
     /// Unless otherwise specified,

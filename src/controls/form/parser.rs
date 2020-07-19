@@ -1,18 +1,18 @@
-use nom::IResult;
 use nom::error::{ErrorKind, ParseError};
-use nom::number::complete::{le_u8, le_u16, le_u32};
-use nom_methods::{call_m};
+use nom::number::complete::{le_u16, le_u32, le_u8};
+use nom::IResult;
+use nom_methods::call_m;
 
-use super::*;
 use super::stream::*;
-use crate::properties::types::{
-    color::{OleColor, parser::AlignedColorParser},
-    font::parser::parse_guid_and_font,
-    parser::{parse_size, parse_position},
-    string::{stream::CountOfBytesWithCompressionFlag, parser::parse_string},
-};
+use super::*;
+use crate::common::{parser::*, VarFlags, VarType};
 use crate::controls::ole_site_concrete::parser::parse_ole_site_concrete;
-use crate::common::{VarFlags, VarType, parser::*};
+use crate::properties::types::{
+    color::{parser::AlignedColorParser, OleColor},
+    font::parser::parse_guid_and_font,
+    parser::{parse_position, parse_size},
+    string::{parser::parse_string, stream::CountOfBytesWithCompressionFlag},
+};
 
 use std::cell::Cell;
 
@@ -33,7 +33,6 @@ named!(pub parse_site_class_info_header<u16>,
 );
 
 pub fn parse_site_class_info(input: &[u8]) -> IResult<&[u8], ClassTable> {
-
     let ap = Cell::new(0);
     let _i = input;
 
@@ -79,7 +78,7 @@ pub fn parse_site_class_info(input: &[u8]) -> IResult<&[u8], ClassTable> {
     };
 
     // Put Bind Index
-    let (_i, put_bind_index) = if  mask.contains(ClassInfoPropMask::PUT_BIND_INDEX) {
+    let (_i, put_bind_index) = if mask.contains(ClassInfoPropMask::PUT_BIND_INDEX) {
         ap.le_u16(_i)?
     } else {
         (_i, 0x0000)
@@ -150,20 +149,35 @@ pub fn parse_site_class_info(input: &[u8]) -> IResult<&[u8], ClassTable> {
         (_i, GUID::DEFAULT)
     };
 
-    Ok((_i, ClassTable{
-        class_table_flags, var_flags, count_of_methods,
-        dispid_bind,
-        get_bind_index, put_bind_index, bind_type,
-        get_value_index, put_value_index, value_type,
-        dispid_rowset, set_rowset,
-        cls_id, disp_event, default_proc,
-    }))
+    Ok((
+        _i,
+        ClassTable {
+            class_table_flags,
+            var_flags,
+            count_of_methods,
+            dispid_bind,
+            get_bind_index,
+            put_bind_index,
+            bind_type,
+            get_value_index,
+            put_value_index,
+            value_type,
+            dispid_rowset,
+            set_rowset,
+            cls_id,
+            disp_event,
+            default_proc,
+        },
+    ))
 }
 
 impl<T> AlignedFormClassParser for T where T: AlignedParser {}
 
 pub trait AlignedFormClassParser: AlignedParser {
-    fn parse_form_object_depth_type_count<'a>(&self, input: &'a [u8]) -> IResult<&'a [u8], (u8, SiteType, u32)> {
+    fn parse_form_object_depth_type_count<'a>(
+        &self,
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], (u8, SiteType, u32)> {
         let _i = input;
 
         // Depth
@@ -173,7 +187,10 @@ pub trait AlignedFormClassParser: AlignedParser {
         let (_ir, value_bits) = le_u8(_i)?;
         let (_i, value) = match TypeOrCount::from_bits(value_bits) {
             Some(value) => Ok((_ir, value)),
-            None => Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(_i, ErrorKind::MapOpt))),
+            None => Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(
+                _i,
+                ErrorKind::MapOpt,
+            ))),
         }?;
 
         let type_or_count = (value & TypeOrCount::TYPE_OR_COUNT).bits();
@@ -183,8 +200,11 @@ pub trait AlignedFormClassParser: AlignedParser {
                 Some(r#type) => {
                     self.inc(3);
                     Ok((_ir, r#type))
-                },
-                None => Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(_i, ErrorKind::MapOpt))),
+                }
+                None => Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(
+                    _i,
+                    ErrorKind::MapOpt,
+                ))),
             }?;
             let count = u32::from(type_or_count);
             (_i, (depth, r#type, count))
@@ -193,8 +213,11 @@ pub trait AlignedFormClassParser: AlignedParser {
                 Some(r#type) => {
                     self.inc(2);
                     Ok((_i, r#type))
-                },
-                None => Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(_i, ErrorKind::MapOpt))),
+                }
+                None => Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(
+                    _i,
+                    ErrorKind::MapOpt,
+                ))),
             }?;
             (_i, (depth, r#type, 1))
         };
@@ -202,8 +225,10 @@ pub trait AlignedFormClassParser: AlignedParser {
     }
 }
 
-pub fn parse_site_depths_and_types(input: &[u8], count_of_sites: u32) -> IResult<&[u8], Vec<SiteDepthAndType>> {
-
+pub fn parse_site_depths_and_types(
+    input: &[u8],
+    count_of_sites: u32,
+) -> IResult<&[u8], Vec<SiteDepthAndType>> {
     let ap = Cell::new(0);
 
     let mut site_count: u32 = 0;
@@ -213,7 +238,7 @@ pub fn parse_site_depths_and_types(input: &[u8], count_of_sites: u32) -> IResult
     while site_count < count_of_sites {
         let (rest, (depth, r#type, count)) = ap.parse_form_object_depth_type_count(data)?;
         site_count += count;
-        let depth_and_type = SiteDepthAndType{depth, r#type};
+        let depth_and_type = SiteDepthAndType { depth, r#type };
         for _i in 0..count {
             result.push(depth_and_type);
         }
@@ -223,20 +248,21 @@ pub fn parse_site_depths_and_types(input: &[u8], count_of_sites: u32) -> IResult
     Ok((rest, result))
 }
 
-pub fn parse_sites(input: &[u8], site_depths_and_types: Vec<SiteDepthAndType>)
--> IResult<&[u8], Vec<Site>> {
+pub fn parse_sites(
+    input: &[u8],
+    site_depths_and_types: Vec<SiteDepthAndType>,
+) -> IResult<&[u8], Vec<Site>> {
     let mut result = Vec::with_capacity(site_depths_and_types.len());
     let mut data = input;
     for site_depth_and_type in site_depths_and_types {
         let (rest, site) = match site_depth_and_type.r#type {
-            SiteType::Ole => parse_ole_site_concrete(data).map(|(r,x)| (r, Site::Ole(x)))?
+            SiteType::Ole => parse_ole_site_concrete(data).map(|(r, x)| (r, Site::Ole(x)))?,
         };
         result.push(site);
         data = rest;
     }
     return Ok((data, result));
 }
-
 
 pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
     let ap = Cell::new(0 as usize);
@@ -348,7 +374,10 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
         if x == 0xFFFF {
             Ok((_ir, x))
         } else {
-            Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(_i, ErrorKind::Verify)))
+            Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(
+                _i,
+                ErrorKind::Verify,
+            )))
         }
     } else {
         Ok((_i, 0))
@@ -360,7 +389,10 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
         if x == 0xFFFF {
             Ok((_ir, x))
         } else {
-            Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(_i, ErrorKind::Verify)))
+            Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(
+                _i,
+                ErrorKind::Verify,
+            )))
         }
     } else {
         Ok((_i, 0))
@@ -409,7 +441,13 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
         ap.inc(8);
         (_ir, displayed_size)
     } else {
-        (_i, Size{width: 4000, height: 3000})
+        (
+            _i,
+            Size {
+                width: 4000,
+                height: 3000,
+            },
+        )
     };
 
     // Logical Size
@@ -418,7 +456,13 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
         ap.inc(8);
         (_ir, logical_size)
     } else {
-        (_i, Size{width: 4000, height: 3000})
+        (
+            _i,
+            Size {
+                width: 4000,
+                height: 3000,
+            },
+        )
     };
 
     // Scroll Position
@@ -427,7 +471,7 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
         ap.inc(8);
         (_ir, scroll_position)
     } else {
-        (_i, Position{top: 0, left: 0})
+        (_i, Position { top: 0, left: 0 })
     };
 
     // Caption
@@ -456,12 +500,13 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
     let (_i, picture) = (_i, GuidAndPicture::EMPTY);
 
     // Size Class Info (count)
-    let (_i, count_of_site_class_info) = if boolean_properties.contains(FormFlags::DONTSAVECLASSTABLE) {
-        (_i, 0)
-    } else {
-        let (_ir, x) = le_u16(_i)?;
-        (_ir, x as usize)
-    };
+    let (_i, count_of_site_class_info) =
+        if boolean_properties.contains(FormFlags::DONTSAVECLASSTABLE) {
+            (_i, 0)
+        } else {
+            let (_ir, x) = le_u16(_i)?;
+            (_ir, x as usize)
+        };
 
     let (_i, site_classes) = count!(_i, parse_site_class_info, count_of_site_class_info)?;
 
@@ -472,13 +517,35 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
     let (_i, site_depths_and_types) = parse_site_depths_and_types(_i, count_of_sites)?;
     let (_i, sites) = parse_sites(_i, site_depths_and_types)?;
 
-    Ok((_i, FormControl {
-        back_color, fore_color, next_available_id, boolean_properties,
-        border_style, mouse_pointer, scroll_bars, group_count,
-        cycle, special_effect, border_color, zoom, draw_buffer,
-        picture_alignment, picture_size_mode, shape_cookie,
-        displayed_size, logical_size, scroll_position, caption,
-        mouse_icon, font, picture, picture_tiling,
-        sites, site_classes,
-    }))
+    Ok((
+        _i,
+        FormControl {
+            back_color,
+            fore_color,
+            next_available_id,
+            boolean_properties,
+            border_style,
+            mouse_pointer,
+            scroll_bars,
+            group_count,
+            cycle,
+            special_effect,
+            border_color,
+            zoom,
+            draw_buffer,
+            picture_alignment,
+            picture_size_mode,
+            shape_cookie,
+            displayed_size,
+            logical_size,
+            scroll_position,
+            caption,
+            mouse_icon,
+            font,
+            picture,
+            picture_tiling,
+            sites,
+            site_classes,
+        },
+    ))
 }

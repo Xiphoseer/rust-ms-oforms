@@ -4,27 +4,21 @@
 //!
 //! > All parent controls MUST contain a FormControl. The FormControl properties are persisted to a stream as specified in section 2.1.1.2. The name of this stream MUST be "f". An OleSiteConcrete is persisted in this stream for each embedded control, as specified by the FormControl in section 2.2.10.12. The FormControl can also contain a DesignExtender, as specified in section 2.2.10.11.
 
+use crate::controls::ole_site_concrete::OleSiteConcrete;
 #[allow(unused_imports)]
 use num_traits::{FromPrimitive, ToPrimitive};
-use crate::controls::ole_site_concrete::OleSiteConcrete;
 
+use crate::common::{VarFlags, VarType, GUID};
 use crate::properties::types::{
-    font::GuidAndFont,
-    picture::GuidAndPicture,
-    color::OleColor,
-    SpecialEffect,
-    PictureAlignment,
-    PictureSizeMode,
-    MousePointer,
-    Size, Position,
+    color::OleColor, font::GuidAndFont, picture::GuidAndPicture, MousePointer, PictureAlignment,
+    PictureSizeMode, Position, Size, SpecialEffect,
 };
-use crate::common::{GUID, VarFlags, VarType};
 
+pub mod designex;
 pub mod parser;
 pub mod stream;
-pub mod designex;
 
-bitflags!{
+bitflags! {
     /// A bit field that specifies Boolean properties of a form.
     pub struct FormFlags: u32 {
         /// Specifies whether the form is enabled.

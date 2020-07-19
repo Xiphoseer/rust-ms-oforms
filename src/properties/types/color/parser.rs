@@ -1,8 +1,8 @@
-use nom::number::complete::{le_u8, le_u16};
-use nom::{IResult};
+use nom::number::complete::{le_u16, le_u8};
+use nom::IResult;
 //use nom_methods::call_m;
-use crate::common::parser::{AlignedParser};
 use super::*;
+use crate::common::parser::AlignedParser;
 
 named!(pub parse_rgb_color<RgbColor>,
     do_parse!(

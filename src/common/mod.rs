@@ -1,27 +1,31 @@
 pub mod parser;
 
-use std::fmt::{Debug, Formatter, Error as FmtError};
+use std::fmt::{Debug, Error as FmtError, Formatter};
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct GUID(pub u32, pub u16, pub u16, pub u64);
 
 impl GUID {
-    pub const EMPTY         : Self = Self(0,0,0,0);
+    pub const EMPTY: Self = Self(0, 0, 0, 0);
     /// {0BE35203-8F91-11CE-9DE3-00AA004BB851}
-    pub const STD_FONT      : Self = Self(0x0352E30B, 0x918F, 0xCE11, 0x51B84B00AA00E39D);
+    pub const STD_FONT: Self = Self(0x0352E30B, 0x918F, 0xCE11, 0x51B84B00AA00E39D);
     /// {AFC20920-DA4E-11CE-B943-00AA006887B4}
-    pub const TEXT_PROPS    : Self = Self(0x2009C2AF, 0x4EDA, 0xCE11, 0xB4876800AA0043B9);
+    pub const TEXT_PROPS: Self = Self(0x2009C2AF, 0x4EDA, 0xCE11, 0xB4876800AA0043B9);
     /// {0BE35204-8F91-11CE-9DE3-00AA004BB851}
-    pub const STD_PICTURE   : Self = Self(0x0452E30B, 0x918F, 0xCE11, 0x51B84B00AA00E39D);
+    pub const STD_PICTURE: Self = Self(0x0452E30B, 0x918F, 0xCE11, 0x51B84B00AA00E39D);
     /// What is this font?
-    pub const WTF_FONT      : Self = Self(0x105B80DE, 0x95F1, 0x11D0, 0x5CCBBD00AA00A0B0);
+    pub const WTF_FONT: Self = Self(0x105B80DE, 0x95F1, 0x11D0, 0x5CCBBD00AA00A0B0);
     /// {00020400-0000-0000-C000-000000000046}
-    pub const DEFAULT       : Self = Self(0x00020400, 0x0000, 0x0000, 0x000000000046C000);
+    pub const DEFAULT: Self = Self(0x00020400, 0x0000, 0x0000, 0x000000000046C000);
 }
 
 impl Debug for GUID {
     fn fmt<'a>(&self, fmt: &mut Formatter<'a>) -> Result<(), FmtError> {
-        write!(fmt, "{{{:x}-{:x}-{:x}-{:x}}}", self.0, self.1, self.2, self.3)
+        write!(
+            fmt,
+            "{{{:x}-{:x}-{:x}-{:x}}}",
+            self.0, self.1, self.2, self.3
+        )
     }
 }
 
