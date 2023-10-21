@@ -20,7 +20,7 @@ impl GUID {
 }
 
 impl Debug for GUID {
-    fn fmt<'a>(&self, fmt: &mut Formatter<'a>) -> Result<(), FmtError> {
+    fn fmt(&self, fmt: &mut Formatter) -> Result<(), FmtError> {
         write!(
             fmt,
             "{{{:x}-{:x}-{:x}-{:x}}}",

@@ -2,9 +2,9 @@ pub mod parser;
 
 #[derive(Debug)]
 pub struct RgbColor {
-    green: u8,
-    blue: u8,
-    red: u8,
+    pub green: u8,
+    pub blue: u8,
+    pub red: u8,
 }
 
 pub type PaletteEntry = u16;

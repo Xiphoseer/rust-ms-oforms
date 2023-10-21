@@ -265,7 +265,7 @@ pub fn parse_sites(
 }
 
 pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
-    let ap = Cell::new(0 as usize);
+    let ap = Cell::new(0usize);
     let _i = input;
 
     // Form Control Header
@@ -402,7 +402,7 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
     let (_i, zoom) = if mask.contains(FormPropMask::ZOOM) {
         ap.le_u32(_i)?
     } else {
-        (_i, 100 as u32)
+        (_i, 100u32)
     };
 
     // Picture Alignment
@@ -423,14 +423,14 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
     let (_i, shape_cookie) = if mask.contains(FormPropMask::SHAPE_COOKIE) {
         ap.le_u32(_i)?
     } else {
-        (_i, 0 as u32)
+        (_i, 0u32)
     };
 
     // Draw Buffer
     let (_i, draw_buffer) = if mask.contains(FormPropMask::DRAW_BUFFER) {
         ap.le_u32(_i)?
     } else {
-        (_i, 0 as u32)
+        (_i, 0u32)
     };
 
     let (_i, _o) = ap.align(_i, 4)?;

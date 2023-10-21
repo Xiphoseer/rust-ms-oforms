@@ -1,3 +1,5 @@
+#![allow(clippy::bad_bit_mask)] // fixme: update bitflags
+
 bitflags! {
     /// Specifies the size of an fmString and whether the string is compressed.
     pub struct CountOfBytesWithCompressionFlag: u32 {
