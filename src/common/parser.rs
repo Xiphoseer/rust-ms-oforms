@@ -1,13 +1,14 @@
 use super::GUID;
+use nom::bytes::complete::take;
+use nom::combinator::{map_opt, verify};
 use nom::number::complete::{le_i16, le_i32, le_u16, le_u32, le_u64, le_u8};
 use nom::IResult;
-use nom_methods::call_m;
 
 use std::cell::Cell;
 
-named_args!(pub check_guid(guid: GUID)<GUID>,
-    verify!(parse_guid, |x| x == &guid)
-);
+pub fn check_guid<'a>(guid: GUID) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], GUID> {
+    verify(parse_guid, move |x| x == &guid)
+}
 
 pub fn parse_guid(input: &[u8]) -> IResult<&[u8], GUID> {
     let (input, d1) = le_u32(input)?;
@@ -60,7 +61,7 @@ pub trait AlignedParser {
     where
         F: Fn(u32) -> Option<C>,
     {
-        map_opt!(input, call_m!(self.le_u32), func)
+        map_opt(move |i| self.le_u32(i), func)(input)
     }
 
     /// Read an u16 bitfield
@@ -68,7 +69,7 @@ pub trait AlignedParser {
     where
         F: Fn(u16) -> Option<C>,
     {
-        map_opt!(input, call_m!(self.le_u16), func)
+        map_opt(move |i| self.le_u16(i), func)(input)
     }
 
     /// Read an u8 bitfield
@@ -76,7 +77,7 @@ pub trait AlignedParser {
     where
         F: Fn(u8) -> Option<C>,
     {
-        map_opt!(input, call_m!(self.le_u8), func)
+        map_opt(move |i| self.le_u8(i), func)(input)
     }
 }
 
@@ -85,7 +86,7 @@ impl AlignedParser for Cell<usize> {
         let p0 = self.get();
         let p1 = p0 % align;
         let p2 = if p1 == 0 { 0 } else { align - p1 };
-        let (rest, _pad) = take!(input, p2)?;
+        let (rest, _pad) = take(p2)(input)?;
         let p3 = p0 + p2;
         self.set(p3);
         Ok((rest, p3))

@@ -2,19 +2,17 @@ use super::stream::*;
 use super::*;
 use crate::common::AlignedParser;
 use crate::properties::types::string::{parse_string, stream::CountOfBytesWithCompressionFlag};
+use nom::bytes::complete::tag;
 use nom::combinator::{map, map_opt};
 use nom::number::complete::le_u16;
+use nom::sequence::preceded;
 use nom::IResult;
 
 use std::cell::Cell;
 
-named!(pub parse_ole_site_concrete_header<u16>,
-    do_parse!(
-        tag!([0x00, 0x00]) >>
-        cb_site: le_u16 >>
-        (cb_site)
-    )
-);
+pub fn parse_ole_site_concrete_header(input: &[u8]) -> IResult<&[u8], u16> {
+    preceded(tag([0x00, 0x00]), le_u16)(input)
+}
 
 pub trait AlignedOleSiteParser: AlignedParser {
     fn parse_cobwcf<'a>(

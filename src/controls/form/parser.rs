@@ -1,7 +1,10 @@
+use nom::bytes::complete::tag;
+use nom::combinator::verify;
 use nom::error::{ErrorKind, ParseError};
+use nom::multi::count;
 use nom::number::complete::{le_u16, le_u32, le_u8};
+use nom::sequence::preceded;
 use nom::IResult;
-use nom_methods::call_m;
 
 use super::stream::*;
 use super::*;
@@ -16,21 +19,13 @@ use crate::properties::types::{
 
 use std::cell::Cell;
 
-named!(pub parse_form_control_header<u16>,
-    do_parse!(
-        tag!([0x00, 0x04]) >>
-        byte_count: le_u16 >>
-        (byte_count)
-    )
-);
+pub fn parse_form_control_header(input: &[u8]) -> IResult<&[u8], u16> {
+    preceded(tag([0x00, 0x04]), le_u16)(input)
+}
 
-named!(pub parse_site_class_info_header<u16>,
-    do_parse!(
-        tag!([0x00, 0x00]) >>
-        byte_count: le_u16 >>
-        (byte_count)
-    )
-);
+pub fn parse_site_class_info_header(input: &[u8]) -> IResult<&[u8], u16> {
+    preceded(tag([0x00, 0x00]), le_u16)(input)
+}
 
 pub fn parse_site_class_info(input: &[u8]) -> IResult<&[u8], ClassTable> {
     let ap = Cell::new(0);
@@ -335,7 +330,7 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
 
     // Mouse Icon
     let (_i, _mouse_icon) = if mask.contains(FormPropMask::MOUSE_ICON) {
-        verify!(_i, call_m!(ap.le_u16), |x| *x == 0xFFFF)?
+        verify(|i| ap.le_u16(i), |x| *x == 0xFFFF)(_i)?
     } else {
         (_i, 0)
     };
@@ -508,7 +503,7 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
             (_ir, x as usize)
         };
 
-    let (_i, site_classes) = count!(_i, parse_site_class_info, count_of_site_class_info)?;
+    let (_i, site_classes) = count(parse_site_class_info, count_of_site_class_info)(_i)?;
 
     // TODO: DesignEx?
     let (_i, count_of_sites) = le_u32(_i)?;

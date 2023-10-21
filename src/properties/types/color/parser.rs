@@ -1,61 +1,12 @@
-use nom::number::complete::{le_u16, le_u8};
-use nom::IResult;
-//use nom_methods::call_m;
 use super::*;
 use crate::common::AlignedParser;
+use nom::combinator::map_res;
+use nom::number::complete::le_u32;
+use nom::IResult;
 
-pub fn parse_rgb_color(input: &[u8]) -> IResult<&[u8], RgbColor> {
-    let (input, green) = le_u8(input)?;
-    let (input, blue) = le_u8(input)?;
-    let (input, red) = le_u8(input)?;
-    Ok((input, RgbColor { red, green, blue }))
+pub fn parse_ole_color(input: &[u8]) -> IResult<&[u8], OleColor> {
+    map_res(le_u32, OleColor::try_from)(input)
 }
-
-named!(pub parse_palette_entry<PaletteEntry>,
-    call!(le_u16)
-);
-
-named!(pub parse_default_ole_color<OleColor>,
-    do_parse!(
-        rgb: parse_rgb_color >>
-        tag!([OleColorType::Default as u8]) >>
-        (OleColor::Default(rgb))
-    )
-);
-
-named!(pub parse_rgb_ole_color<OleColor>,
-    do_parse!(
-        rgb: parse_rgb_color >>
-        tag!([OleColorType::RgbColor as u8]) >>
-        (OleColor::RgbColor(rgb))
-    )
-);
-
-named!(pub parse_palette_ole_color<OleColor>,
-    do_parse!(
-        entry: parse_palette_entry >>
-        take!(1) >>
-        tag!([OleColorType::PaletteEntry as u8]) >>
-        (OleColor::PaletteEntry(entry))
-    )
-);
-
-named!(pub parse_system_ole_color<OleColor>,
-    do_parse!(
-        entry: parse_palette_entry >>
-        take!(1) >>
-        tag!([OleColorType::SystemPalette as u8]) >>
-        (OleColor::SystemPalette(entry))
-    )
-);
-
-named!(pub parse_ole_color<OleColor>,
-    alt!( parse_default_ole_color
-        | parse_palette_ole_color
-        | parse_rgb_ole_color
-        | parse_system_ole_color
-    )
-);
 
 /// Trait to parse a color
 pub trait AlignedColorParser: AlignedParser {
