@@ -2,8 +2,8 @@ use super::stream::*;
 use super::*;
 use crate::common::AlignedParser;
 use crate::properties::types::string::{parse_string, stream::CountOfBytesWithCompressionFlag};
-use nom::bytes::complete::tag;
-use nom::combinator::{map, map_opt};
+use nom::bytes::complete::{tag, take};
+use nom::combinator::{map, map_opt, map_parser};
 use nom::error::{context, ContextError, ParseError};
 use nom::number::complete::le_u16;
 use nom::sequence::preceded;
@@ -170,11 +170,18 @@ where
     E: ParseError<&'a [u8]>,
     E: ContextError<&'a [u8]>,
 {
+    // Header
+    let (input, cb_site) = context("header", parse_ole_site_concrete_header)(input)?;
+    map_parser(take(cb_site), _parse_ole_site_concrete)(input)
+}
+
+fn _parse_ole_site_concrete<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], OleSiteConcrete, E>
+where
+    E: ParseError<&'a [u8]>,
+    E: ContextError<&'a [u8]>,
+{
     let ap = Cell::new(0);
     let _i = input;
-
-    // Header
-    let (_i, _cb_site) = context("header", parse_ole_site_concrete_header)(_i)?;
 
     // Mask
     let (_i, mask) = context("mask", map_opt(|i| ap.le_u32(i), SitePropMask::from_bits))(_i)?;
