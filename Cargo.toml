@@ -1,6 +1,6 @@
 [package]
 name = "ms-oforms"
-version = "0.3.0-alpha1"
+version = "0.3.0-alpha2"
 authors = ["Xiphoseer"]
 edition = "2018"
 description = "Parser and Datastructures for [MS-OFORMS]"
