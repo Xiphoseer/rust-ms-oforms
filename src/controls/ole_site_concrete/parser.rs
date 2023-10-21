@@ -228,13 +228,13 @@ where
     ap.align(_i, 4)?;
     let (_i, name) = ap.parse_str(_i, mask, SitePropMask::NAME, name_data)?;
 
-    ap.align(_i, 4)?;
+    //ap.align(_i, 4)?;
     let (_i, tag) = ap.parse_str(_i, mask, SitePropMask::TAG, tag_data)?;
 
-    ap.align(_i, 4)?;
+    //ap.align(_i, 4)?;
     let (_i, site_position) = ap.parse_position(_i, mask, SitePropMask::POSITION)?;
 
-    ap.align(_i, 4)?;
+    //ap.align(_i, 4)?;
     let (_i, control_tip_text) = ap.parse_str(
         _i,
         mask,
@@ -242,7 +242,7 @@ where
         control_tip_text_data,
     )?;
 
-    ap.align(_i, 4)?;
+    //ap.align(_i, 4)?;
     let (_i, runtime_lic_key) = ap.parse_str(
         _i,
         mask,
@@ -250,11 +250,11 @@ where
         runtime_lic_key_data,
     )?;
 
-    ap.align(_i, 4)?;
+    //ap.align(_i, 4)?;
     let (_i, control_source) =
         ap.parse_str(_i, mask, SitePropMask::CONTROL_SOURCE, control_source_data)?;
 
-    ap.align(_i, 4)?;
+    //ap.align(_i, 4)?;
     let (_i, row_source) = ap.parse_str(_i, mask, SitePropMask::ROW_SOURCE, row_source_data)?;
 
     Ok((
