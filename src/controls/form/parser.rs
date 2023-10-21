@@ -1,6 +1,5 @@
 use nom::bytes::complete::tag;
-use nom::combinator::verify;
-use nom::error::{ErrorKind, ParseError};
+use nom::combinator::{map_opt, success, verify};
 use nom::multi::count;
 use nom::number::complete::{le_u16, le_u32, le_u8};
 use nom::sequence::preceded;
@@ -179,41 +178,17 @@ pub trait AlignedFormClassParser: AlignedParser {
         let (_i, depth) = le_u8(_i)?;
 
         // Value
-        let (_ir, value_bits) = le_u8(_i)?;
-        let (_i, value) = match TypeOrCount::from_bits(value_bits) {
-            Some(value) => Ok((_ir, value)),
-            None => Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(
-                _i,
-                ErrorKind::MapOpt,
-            ))),
-        }?;
+        let (_i, value) = map_opt(le_u8, TypeOrCount::from_bits)(_i)?;
 
         let type_or_count = (value & TypeOrCount::TYPE_OR_COUNT).bits();
         let (_i, res) = if value.contains(TypeOrCount::IS_COUNT) {
-            let (_ir, type_bits) = le_u8(_i)?;
-            let (_i, r#type) = match SiteType::from_u8(type_bits) {
-                Some(r#type) => {
-                    self.inc(3);
-                    Ok((_ir, r#type))
-                }
-                None => Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(
-                    _i,
-                    ErrorKind::MapOpt,
-                ))),
-            }?;
+            let (_i, r#type) = map_opt(le_u8, SiteType::from_u8)(_i)?;
+            self.inc(3);
             let count = u32::from(type_or_count);
             (_i, (depth, r#type, count))
         } else {
-            let (_i, r#type) = match SiteType::from_u8(type_or_count) {
-                Some(r#type) => {
-                    self.inc(2);
-                    Ok((_i, r#type))
-                }
-                None => Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(
-                    _i,
-                    ErrorKind::MapOpt,
-                ))),
-            }?;
+            let (_i, r#type) = map_opt(success(type_or_count), SiteType::from_u8)(_i)?;
+            self.inc(2);
             (_i, (depth, r#type, 1))
         };
         Ok((_i, res))
@@ -365,30 +340,14 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
 
     // Mouse Icon
     let (_i, _font) = if mask.contains(FormPropMask::FONT) {
-        let (_ir, x) = ap.le_u16(_i)?;
-        if x == 0xFFFF {
-            Ok((_ir, x))
-        } else {
-            Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(
-                _i,
-                ErrorKind::Verify,
-            )))
-        }
+        verify(|i| ap.le_u16(i), |x| *x == 0xFFFF)(_i)
     } else {
         Ok((_i, 0))
     }?;
 
     // Picture
     let (_i, _picture) = if mask.contains(FormPropMask::PICTURE) {
-        let (_ir, x) = ap.le_u16(_i)?;
-        if x == 0xFFFF {
-            Ok((_ir, x))
-        } else {
-            Err(nom::Err::Error(<(&[u8], ErrorKind)>::from_error_kind(
-                _i,
-                ErrorKind::Verify,
-            )))
-        }
+        verify(|i| ap.le_u16(i), |x| *x == 0xFFFF)(_i)
     } else {
         Ok((_i, 0))
     }?;

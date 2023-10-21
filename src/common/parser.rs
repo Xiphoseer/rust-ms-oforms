@@ -6,7 +6,7 @@ use nom::IResult;
 
 use std::cell::Cell;
 
-pub fn check_guid<'a>(guid: GUID) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], GUID> {
+pub fn check_guid<'a>(guid: GUID) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], GUID> {
     verify(parse_guid, move |x| x == &guid)
 }
 

@@ -10,7 +10,7 @@ fn decode_utf16_le(bytes: &[u8]) -> Cow<'_, str> {
 
 pub fn parse_string<'a>(
     length_and_compression: CountOfBytesWithCompressionFlag,
-) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], String> {
+) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], String> {
     map(
         map(
             take(length_and_compression.len()),
