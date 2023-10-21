@@ -1,19 +1,24 @@
-use super::stream::*;
-use encoding_rs::{UTF_16LE, mem::decode_latin1};
 use std::borrow::Cow;
 
-fn parse_str(bytes: &[u8], compressed: bool) -> String {
-    if compressed {
-        // Isomorphic Decode
-        decode_latin1(bytes)
-    } else {
-        UTF_16LE.decode(bytes).0
-    }.into_owned()
+use super::stream::*;
+use encoding_rs::{mem::decode_latin1, UTF_16LE};
+use nom::{bytes::complete::take, combinator::map, IResult};
+
+fn decode_utf16_le(bytes: &[u8]) -> Cow<'_, str> {
+    UTF_16LE.decode(bytes).0
 }
 
-named_args!(pub parse_string(length_and_compression: CountOfBytesWithCompressionFlag)<String>,
-    map!(
-        take!((length_and_compression & CountOfBytesWithCompressionFlag::COUNT_OF_BYTES).bits()),
-        |x| parse_str(x, length_and_compression.contains(CountOfBytesWithCompressionFlag::COMPRESSION_FLAG))
+pub fn parse_string<'a>(
+    length_and_compression: CountOfBytesWithCompressionFlag,
+) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], String> {
+    map(
+        map(
+            take(length_and_compression.len()),
+            match length_and_compression.compressed() {
+                true => decode_latin1, // Isomorphic Decode
+                false => decode_utf16_le,
+            },
+        ),
+        Cow::into_owned,
     )
-);
+}

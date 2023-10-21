@@ -113,7 +113,7 @@ pub trait AlignedOleSiteParser: AlignedParser {
         length_and_compression: CountOfBytesWithCompressionFlag,
     ) -> IResult<&'a [u8], String> {
         if mask.contains(flag) {
-            let (input, s) = parse_string(input, length_and_compression)?;
+            let (input, s) = parse_string(length_and_compression)(input)?;
             self.inc(s.len());
             Ok((input, s))
         } else {

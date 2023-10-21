@@ -476,7 +476,7 @@ pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
 
     // Caption
     let (_i, caption) = if mask.contains(FormPropMask::CAPTION) {
-        parse_string(_i, caption_length)?
+        parse_string(caption_length)(_i)?
     } else {
         (_i, String::from(""))
     };

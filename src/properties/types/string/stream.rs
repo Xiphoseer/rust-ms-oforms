@@ -12,3 +12,13 @@ bitflags! {
         const EMPTY            = 0x00000000;
     }
 }
+
+impl CountOfBytesWithCompressionFlag {
+    pub fn len(&self) -> u32 {
+        (*self & Self::COUNT_OF_BYTES).bits()
+    }
+
+    pub fn compressed(&self) -> bool {
+        self.contains(Self::COMPRESSION_FLAG)
+    }
+}
