@@ -5,6 +5,7 @@ bitflags! {
     /// Specifies the properties of the control are not set to the file format default.
     ///
     /// For each bit, a value of zero specifies that the corresponding property is the file format default and is not stored in the file.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct SitePropMask: u32 {
         /// Specifies whether the size and compression flag of the Name property are stored in the DataBlock.NameData of the OleSiteConcreteControl that contains this SitePropMask and the Name string is stored in the ExtraDataBlock.Name of the OleSiteConcreteControl.
         const NAME                  = 0x00000001;
@@ -39,6 +40,7 @@ bitflags! {
 }
 
 bitflags! {
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct ClsidCacheIndex: u16 {
         const INVALID               = 0x7FFF;
         const INDEX_MASK            = 0x7FFF;

@@ -111,6 +111,7 @@ bitflags! {
 
 bitflags! {
     /// Specifies the type of this site or the count of sites with a following type
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct TypeOrCount: u8 {
         /// Mask for the data part fo this field
         const TYPE_OR_COUNT = 0x7F;

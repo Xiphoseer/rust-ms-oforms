@@ -9,7 +9,7 @@ repository = "https://github.com/xiphoseer/rust-ms-oforms"
 readme = "README.md"
 
 [dependencies]
-bitflags = "1.0"
+bitflags = "2.4.1"
 nom-methods = "0.2"
 nom = "5.0"
 num-traits = "0.2"

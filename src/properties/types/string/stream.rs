@@ -2,6 +2,7 @@
 
 bitflags! {
     /// Specifies the size of an fmString and whether the string is compressed.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct CountOfBytesWithCompressionFlag: u32 {
         /// Specifies whether the string is compressed.
         const COMPRESSION_FLAG = 0x80000000;

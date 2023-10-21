@@ -20,6 +20,7 @@ pub mod stream;
 
 bitflags! {
     /// A bit field that specifies Boolean properties of a form.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct FormFlags: u32 {
         /// Specifies whether the form is enabled.
         const ENABLED               = 0x00000004;
@@ -51,6 +52,7 @@ pub enum Cycle {
 
 bitflags! {
     /// A bit field that specifies the location of the scroll bars of a form.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct FormScrollBarFlags: u8 {
         /// Specifies whether the horizontal scroll bar is displayed.
         const HORIZONTAL = 0x01;
@@ -63,7 +65,7 @@ bitflags! {
         /// Specifies whether to display the vertical scroll bar on the left side of the form.
         const KEEP_LEFT = 0x10;
         /// The default value
-        const DEFAULT = Self::KEEP_HORIZONTAL.bits | Self::KEEP_VERTICAL.bits;
+        const DEFAULT = Self::KEEP_HORIZONTAL.bits() | Self::KEEP_VERTICAL.bits();
     }
 }
 
@@ -158,6 +160,7 @@ pub struct FormControl {
 
 bitflags! {
     /// A bit field that specifies Boolean properties of a SiteClassInfo.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct ClsTableFlags: u16 {
         /// Specifies whether the typeKind member of the TYPEATTR that describes this type
         /// information, as specified in [MS-OAUT] section 2.2.44, is set to TKIND_ALIAS, as

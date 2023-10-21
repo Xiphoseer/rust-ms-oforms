@@ -34,6 +34,7 @@ bitflags! {
     ///
     /// The VARFLAGS enumeration values are used in the wVarFlags field of a VARDESC to specify the
     /// features of a field, constant, or ODL dispinterface property, as specified in section 2.2.43.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct VarFlags: u16 {
         /// MUST be set if the variable is an ODL dispinterface property that was declared with the [readonly] attribute (see section 2.2.49.5.3).
         const READONLY = 0x1;

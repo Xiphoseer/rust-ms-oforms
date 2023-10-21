@@ -10,6 +10,7 @@ bitflags! {
     /// Unless otherwise specified,
     /// each bit applies to all control types. All bits that do not apply to a particular type of
     /// control MUST be set to zero for that control.
+    #[derive(Debug)]
     pub struct SiteFlags: u32 {
         /// Specifies whether the control can receive focus while the user is navigating
         /// controls using the TAB key.
