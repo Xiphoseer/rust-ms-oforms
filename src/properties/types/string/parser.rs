@@ -1,18 +1,18 @@
 use super::stream::*;
-use encoding::{all::UTF_16LE, mem::decode_latin1, DecoderTrap, Encoding};
+use encoding_rs::{UTF_16LE, mem::decode_latin1};
 use std::borrow::Cow;
 
-fn parse_str(bytes: &[u8], compressed: bool) -> Result<String, Cow<'static, str>> {
+fn parse_str(bytes: &[u8], compressed: bool) -> String {
     if compressed {
         // Isomorphic Decode
-        Ok(decode_latin1(bytes).into_owned())
+        decode_latin1(bytes)
     } else {
-        UTF_16LE.decode(bytes, DecoderTrap::Strict)
-    }
+        UTF_16LE.decode(bytes).0
+    }.into_owned()
 }
 
 named_args!(pub parse_string(length_and_compression: CountOfBytesWithCompressionFlag)<String>,
-    map_res!(
+    map!(
         take!((length_and_compression & CountOfBytesWithCompressionFlag::COUNT_OF_BYTES).bits()),
         |x| parse_str(x, length_and_compression.contains(CountOfBytesWithCompressionFlag::COMPRESSION_FLAG))
     )
