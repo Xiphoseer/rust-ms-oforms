@@ -1,15 +1,11 @@
 use super::stream::*;
-use encoding::{all::UTF_16LE, DecoderTrap, Encoding};
+use encoding::{all::UTF_16LE, mem::decode_latin1, DecoderTrap, Encoding};
 use std::borrow::Cow;
 
 fn parse_str(bytes: &[u8], compressed: bool) -> Result<String, Cow<'static, str>> {
     if compressed {
-        let mut new_bytes: Vec<u8> = Vec::with_capacity(bytes.len() * 2);
-        for byte in bytes {
-            new_bytes.push(*byte);
-            new_bytes.push(0);
-        }
-        UTF_16LE.decode(&new_bytes, DecoderTrap::Strict)
+        // Isomorphic Decode
+        Ok(decode_latin1(bytes).into_owned())
     } else {
         UTF_16LE.decode(bytes, DecoderTrap::Strict)
     }
