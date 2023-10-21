@@ -1,5 +1,6 @@
 //! Specifies properties stored for each embedded control in a UserForm control.
-pub mod parser;
+mod parser;
+pub use parser::*;
 pub mod stream;
 
 use crate::properties::types::Position;

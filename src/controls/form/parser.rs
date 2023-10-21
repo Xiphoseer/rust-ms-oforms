@@ -5,13 +5,13 @@ use nom_methods::call_m;
 
 use super::stream::*;
 use super::*;
-use crate::common::{parser::*, VarFlags, VarType};
-use crate::controls::ole_site_concrete::parser::parse_ole_site_concrete;
+use crate::common::{parse_guid, AlignedParser, VarFlags, VarType};
+use crate::controls::ole_site_concrete::parse_ole_site_concrete;
 use crate::properties::types::{
-    color::{parser::AlignedColorParser, OleColor},
-    font::parser::parse_guid_and_font,
-    parser::{parse_position, parse_size},
-    string::{parser::parse_string, stream::CountOfBytesWithCompressionFlag},
+    color::{AlignedColorParser, OleColor},
+    font::parse_guid_and_font,
+    parse_position, parse_size,
+    string::{parse_string, stream::CountOfBytesWithCompressionFlag},
 };
 
 use std::cell::Cell;

@@ -1,9 +1,7 @@
 use super::stream::*;
 use super::*;
-use crate::common::parser::*;
-use crate::properties::types::string::{
-    parser::parse_string, stream::CountOfBytesWithCompressionFlag,
-};
+use crate::common::AlignedParser;
+use crate::properties::types::string::{parse_string, stream::CountOfBytesWithCompressionFlag};
 use nom::combinator::{map, map_opt};
 use nom::number::complete::le_u16;
 use nom::IResult;

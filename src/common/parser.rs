@@ -9,15 +9,13 @@ named_args!(pub check_guid(guid: GUID)<GUID>,
     verify!(parse_guid, |x| x == &guid)
 );
 
-named!(pub parse_guid<GUID>,
-    do_parse!(
-        d1: le_u32 >>
-        d2: le_u16 >>
-        d3: le_u16 >>
-        d4: le_u64 >>
-        (GUID(d1,d2,d3,d4))
-    )
-);
+pub fn parse_guid(input: &[u8]) -> IResult<&[u8], GUID> {
+    let (input, d1) = le_u32(input)?;
+    let (input, d2) = le_u16(input)?;
+    let (input, d3) = le_u16(input)?;
+    let (input, d4) = le_u64(input)?;
+    Ok((input, GUID(d1, d2, d3, d4)))
+}
 
 pub trait AlignedParser {
     fn align<'a>(&self, input: &'a [u8], count: usize) -> IResult<&'a [u8], usize>;

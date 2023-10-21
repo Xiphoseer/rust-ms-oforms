@@ -3,7 +3,8 @@ use num_traits::{FromPrimitive, ToPrimitive};
 
 pub mod color;
 pub mod font;
-pub mod parser;
+mod parser;
+pub use parser::*;
 pub mod picture;
 pub mod string;
 

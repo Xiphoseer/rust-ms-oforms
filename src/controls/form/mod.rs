@@ -15,7 +15,8 @@ use crate::properties::types::{
 };
 
 pub mod designex;
-pub mod parser;
+mod parser;
+pub use parser::*;
 pub mod stream;
 
 bitflags! {

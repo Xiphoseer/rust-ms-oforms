@@ -2,16 +2,14 @@ use nom::number::complete::{le_u16, le_u8};
 use nom::IResult;
 //use nom_methods::call_m;
 use super::*;
-use crate::common::parser::AlignedParser;
+use crate::common::AlignedParser;
 
-named!(pub parse_rgb_color<RgbColor>,
-    do_parse!(
-        green: le_u8 >>
-        blue: le_u8 >>
-        red: le_u8 >>
-        (RgbColor{red, green, blue})
-    )
-);
+pub fn parse_rgb_color(input: &[u8]) -> IResult<&[u8], RgbColor> {
+    let (input, green) = le_u8(input)?;
+    let (input, blue) = le_u8(input)?;
+    let (input, red) = le_u8(input)?;
+    Ok((input, RgbColor { red, green, blue }))
+}
 
 named!(pub parse_palette_entry<PaletteEntry>,
     call!(le_u16)
