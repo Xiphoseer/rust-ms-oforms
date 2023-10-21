@@ -219,6 +219,7 @@ where
 
     // Group ID
     let (_i, group_id) = ap.parse_u16(_i, mask, SitePropMask::GROUP_ID, 0x0000)?;
+    let group_id = NonZeroU16::new(group_id);
 
     let (_i, control_tip_text_data) = ap.parse_cobwcf(_i, mask, SitePropMask::CONTROL_TIP_TEXT)?;
     let (_i, runtime_lic_key_data) = ap.parse_cobwcf(_i, mask, SitePropMask::RUNTIME_LIC_KEY)?;

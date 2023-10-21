@@ -1,5 +1,7 @@
 //! Specifies properties stored for each embedded control in a UserForm control.
 mod parser;
+use std::num::NonZeroU16;
+
 pub use parser::*;
 pub mod stream;
 
@@ -87,7 +89,7 @@ pub struct OleSiteConcrete {
     /// same control group.
     ///
     /// The file format default is 0x0000.
-    pub group_id: u16,
+    pub group_id: Option<NonZeroU16>,
 
     /// An fmString that specifies the name of a control.
     ///
