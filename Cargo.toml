@@ -10,7 +10,6 @@ readme = "README.md"
 
 [dependencies]
 bitflags = "2.4.1"
-nom-methods = "0.2"
 nom = "7"
 num-traits = "0.2"
 num-derive = "0.2"
