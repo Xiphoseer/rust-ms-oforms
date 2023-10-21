@@ -1,5 +1,6 @@
 use nom::bytes::complete::tag;
 use nom::combinator::{map_opt, success, verify};
+use nom::error::{FromExternalError, ParseError};
 use nom::multi::count;
 use nom::number::complete::{le_u16, le_u32, le_u8};
 use nom::sequence::preceded;
@@ -18,15 +19,23 @@ use crate::properties::types::{
 
 use std::cell::Cell;
 
-pub fn parse_form_control_header(input: &[u8]) -> IResult<&[u8], u16> {
+pub fn parse_form_control_header<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], u16, E> {
     preceded(tag([0x00, 0x04]), le_u16)(input)
 }
 
-pub fn parse_site_class_info_header(input: &[u8]) -> IResult<&[u8], u16> {
+pub fn parse_site_class_info_header<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], u16, E>
+where
+    E: ParseError<&'a [u8]>,
+{
     preceded(tag([0x00, 0x00]), le_u16)(input)
 }
 
-pub fn parse_site_class_info(input: &[u8]) -> IResult<&[u8], ClassTable> {
+pub fn parse_site_class_info<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], ClassTable, E>
+where
+    E: ParseError<&'a [u8]>,
+{
     let ap = Cell::new(0);
     let _i = input;
 
@@ -168,10 +177,13 @@ pub fn parse_site_class_info(input: &[u8]) -> IResult<&[u8], ClassTable> {
 impl<T> AlignedFormClassParser for T where T: AlignedParser {}
 
 pub trait AlignedFormClassParser: AlignedParser {
-    fn parse_form_object_depth_type_count<'a>(
+    fn parse_form_object_depth_type_count<'a, E>(
         &self,
         input: &'a [u8],
-    ) -> IResult<&'a [u8], (u8, SiteType, u32)> {
+    ) -> IResult<&'a [u8], (u8, SiteType, u32), E>
+    where
+        E: ParseError<&'a [u8]>,
+    {
         let _i = input;
 
         // Depth
@@ -195,10 +207,13 @@ pub trait AlignedFormClassParser: AlignedParser {
     }
 }
 
-pub fn parse_site_depths_and_types(
-    input: &[u8],
+pub fn parse_site_depths_and_types<'a, E>(
+    input: &'a [u8],
     count_of_sites: u32,
-) -> IResult<&[u8], Vec<SiteDepthAndType>> {
+) -> IResult<&'a [u8], Vec<SiteDepthAndType>, E>
+where
+    E: ParseError<&'a [u8]>,
+{
     let ap = Cell::new(0);
 
     let mut site_count: u32 = 0;
@@ -218,10 +233,13 @@ pub fn parse_site_depths_and_types(
     Ok((rest, result))
 }
 
-pub fn parse_sites(
-    input: &[u8],
+pub fn parse_sites<'a, E>(
+    input: &'a [u8],
     site_depths_and_types: Vec<SiteDepthAndType>,
-) -> IResult<&[u8], Vec<Site>> {
+) -> IResult<&'a [u8], Vec<Site>, E>
+where
+    E: ParseError<&'a [u8]>,
+{
     let mut result = Vec::with_capacity(site_depths_and_types.len());
     let mut data = input;
     for site_depth_and_type in site_depths_and_types {
@@ -234,7 +252,11 @@ pub fn parse_sites(
     Ok((data, result))
 }
 
-pub fn parse_form_control(input: &[u8]) -> IResult<&[u8], FormControl> {
+pub fn parse_form_control<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], FormControl, E>
+where
+    E: ParseError<&'a [u8]>,
+    E: FromExternalError<&'a [u8], u32>,
+{
     let ap = Cell::new(0usize);
     let _i = input;
 

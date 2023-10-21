@@ -4,23 +4,30 @@ use crate::common::AlignedParser;
 use crate::properties::types::string::{parse_string, stream::CountOfBytesWithCompressionFlag};
 use nom::bytes::complete::tag;
 use nom::combinator::{map, map_opt};
+use nom::error::ParseError;
 use nom::number::complete::le_u16;
 use nom::sequence::preceded;
 use nom::IResult;
 
 use std::cell::Cell;
 
-pub fn parse_ole_site_concrete_header(input: &[u8]) -> IResult<&[u8], u16> {
+pub fn parse_ole_site_concrete_header<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], u16, E>
+where
+    E: ParseError<&'a [u8]>,
+{
     preceded(tag([0x00, 0x00]), le_u16)(input)
 }
 
 pub trait AlignedOleSiteParser: AlignedParser {
-    fn parse_cobwcf<'a>(
+    fn parse_cobwcf<'a, E>(
         &self,
         input: &'a [u8],
         mask: SitePropMask,
         flag: SitePropMask,
-    ) -> IResult<&'a [u8], CountOfBytesWithCompressionFlag> {
+    ) -> IResult<&'a [u8], CountOfBytesWithCompressionFlag, E>
+    where
+        E: ParseError<&'a [u8]>,
+    {
         if mask.contains(flag) {
             map_opt(
                 |i| self.le_u32(i),
@@ -31,12 +38,15 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_clsid_cache_index<'a>(
+    fn parse_clsid_cache_index<'a, E>(
         &self,
         input: &'a [u8],
         mask: SitePropMask,
         flag: SitePropMask,
-    ) -> IResult<&'a [u8], ClsidCacheIndex> {
+    ) -> IResult<&'a [u8], ClsidCacheIndex, E>
+    where
+        E: ParseError<&'a [u8]>,
+    {
         if mask.contains(flag) {
             let (input, bits) = self.le_u16(input)?;
             match ClsidCacheIndex::from_bits(bits) {
@@ -48,12 +58,15 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_id<'a>(
+    fn parse_id<'a, E>(
         &self,
         input: &'a [u8],
         mask: SitePropMask,
         flag: SitePropMask,
-    ) -> IResult<&'a [u8], i32> {
+    ) -> IResult<&'a [u8], i32, E>
+    where
+        E: ParseError<&'a [u8]>,
+    {
         if mask.contains(flag) {
             self.le_i32(input)
         } else {
@@ -61,13 +74,16 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_u32<'a>(
+    fn parse_u32<'a, E>(
         &self,
         input: &'a [u8],
         mask: SitePropMask,
         flag: SitePropMask,
         default: u32,
-    ) -> IResult<&'a [u8], u32> {
+    ) -> IResult<&'a [u8], u32, E>
+    where
+        E: ParseError<&'a [u8]>,
+    {
         if mask.contains(flag) {
             self.le_u32(input)
         } else {
@@ -75,13 +91,16 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_u16<'a>(
+    fn parse_u16<'a, E>(
         &self,
         input: &'a [u8],
         mask: SitePropMask,
         flag: SitePropMask,
         default: u16,
-    ) -> IResult<&'a [u8], u16> {
+    ) -> IResult<&'a [u8], u16, E>
+    where
+        E: ParseError<&'a [u8]>,
+    {
         if mask.contains(flag) {
             self.le_u16(input)
         } else {
@@ -89,13 +108,16 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_i16<'a>(
+    fn parse_i16<'a, E>(
         &self,
         input: &'a [u8],
         mask: SitePropMask,
         flag: SitePropMask,
         default: i16,
-    ) -> IResult<&'a [u8], i16> {
+    ) -> IResult<&'a [u8], i16, E>
+    where
+        E: ParseError<&'a [u8]>,
+    {
         if mask.contains(flag) {
             self.le_i16(input)
         } else {
@@ -103,13 +125,16 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_str<'a>(
+    fn parse_str<'a, E>(
         &self,
         input: &'a [u8],
         mask: SitePropMask,
         flag: SitePropMask,
         length_and_compression: CountOfBytesWithCompressionFlag,
-    ) -> IResult<&'a [u8], String> {
+    ) -> IResult<&'a [u8], String, E>
+    where
+        E: ParseError<&'a [u8]>,
+    {
         if mask.contains(flag) {
             let (input, s) = parse_string(length_and_compression)(input)?;
             self.inc(s.len());
@@ -119,12 +144,15 @@ pub trait AlignedOleSiteParser: AlignedParser {
         }
     }
 
-    fn parse_position<'a>(
+    fn parse_position<'a, E>(
         &self,
         input: &'a [u8],
         mask: SitePropMask,
         flag: SitePropMask,
-    ) -> IResult<&'a [u8], Position> {
+    ) -> IResult<&'a [u8], Position, E>
+    where
+        E: ParseError<&'a [u8]>,
+    {
         if mask.contains(flag) {
             let (input, top) = self.le_i32(input)?;
             let (input, left) = self.le_i32(input)?;
@@ -137,7 +165,10 @@ pub trait AlignedOleSiteParser: AlignedParser {
 
 impl<T> AlignedOleSiteParser for T where T: AlignedParser {}
 
-pub fn parse_ole_site_concrete(input: &[u8]) -> IResult<&[u8], OleSiteConcrete> {
+pub fn parse_ole_site_concrete<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], OleSiteConcrete, E>
+where
+    E: ParseError<&'a [u8]>,
+{
     let ap = Cell::new(0);
     let _i = input;
 

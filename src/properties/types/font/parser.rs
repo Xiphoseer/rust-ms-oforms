@@ -2,12 +2,16 @@ use super::{FormFont, GuidAndFont};
 use crate::common::{parse_guid, GUID};
 use nom::bytes::complete::tag;
 use nom::combinator::verify;
+use nom::error::ParseError;
 use nom::{
     number::complete::{le_u16, le_u32},
     IResult,
 };
 
-pub fn parse_guid_and_font(input: &[u8]) -> IResult<&[u8], GuidAndFont> {
+pub fn parse_guid_and_font<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], GuidAndFont, E>
+where
+    E: ParseError<&'a [u8]>,
+{
     let (input, guid) = parse_guid(input)?;
     match guid {
         GUID::WTF_FONT => {

@@ -78,7 +78,7 @@ mod tests {
             }))
         );
         assert_eq!(
-            parse_ole_color(&[0, 0, 255, 0]),
+            parse_ole_color::<nom::error::Error<&[u8]>>(&[0, 0, 255, 0]),
             Ok((
                 &[][..],
                 OleColor::Default(RgbColor {
