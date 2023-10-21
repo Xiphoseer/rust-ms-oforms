@@ -1,6 +1,6 @@
 use nom::bytes::complete::tag;
 use nom::combinator::{map_opt, success, verify};
-use nom::error::{FromExternalError, ParseError};
+use nom::error::{context, ContextError, FromExternalError, ParseError};
 use nom::multi::count;
 use nom::number::complete::{le_u16, le_u32, le_u8};
 use nom::sequence::preceded;
@@ -208,60 +208,64 @@ pub trait AlignedFormClassParser: AlignedParser {
 }
 
 pub fn parse_site_depths_and_types<'a, E>(
-    input: &'a [u8],
     count_of_sites: u32,
-) -> IResult<&'a [u8], Vec<SiteDepthAndType>, E>
+) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], Vec<SiteDepthAndType>, E>
 where
     E: ParseError<&'a [u8]>,
 {
-    let ap = Cell::new(0);
+    move |input: &'a [u8]| {
+        let ap = Cell::new(0);
 
-    let mut site_count: u32 = 0;
-    let ucount = count_of_sites as usize;
-    let mut data = input;
-    let mut result = Vec::with_capacity(ucount);
-    while site_count < count_of_sites {
-        let (rest, (depth, r#type, count)) = ap.parse_form_object_depth_type_count(data)?;
-        site_count += count;
-        let depth_and_type = SiteDepthAndType { depth, r#type };
-        for _i in 0..count {
-            result.push(depth_and_type);
+        let mut site_count: u32 = 0;
+        let ucount = count_of_sites as usize;
+        let mut data = input;
+        let mut result = Vec::with_capacity(ucount);
+        while site_count < count_of_sites {
+            let (rest, (depth, r#type, count)) = ap.parse_form_object_depth_type_count(data)?;
+            site_count += count;
+            let depth_and_type = SiteDepthAndType { depth, r#type };
+            for _i in 0..count {
+                result.push(depth_and_type);
+            }
+            data = rest;
         }
-        data = rest;
+        let (rest, _) = ap.align(data, 4)?;
+        Ok((rest, result))
     }
-    let (rest, _) = ap.align(data, 4)?;
-    Ok((rest, result))
 }
 
 pub fn parse_sites<'a, E>(
-    input: &'a [u8],
     site_depths_and_types: Vec<SiteDepthAndType>,
-) -> IResult<&'a [u8], Vec<Site>, E>
+) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], Vec<Site>, E>
 where
-    E: ParseError<&'a [u8]>,
+    E: ParseError<&'a [u8]> + ContextError<&'a [u8]>,
 {
-    let mut result = Vec::with_capacity(site_depths_and_types.len());
-    let mut data = input;
-    for site_depth_and_type in site_depths_and_types {
-        let (rest, site) = match site_depth_and_type.r#type {
-            SiteType::Ole => parse_ole_site_concrete(data).map(|(r, x)| (r, Site::Ole(x)))?,
-        };
-        result.push(site);
-        data = rest;
+    move |input: &'a [u8]| {
+        let mut result = Vec::with_capacity(site_depths_and_types.len());
+        let mut data = input;
+        for site_depth_and_type in &site_depths_and_types {
+            let (rest, site) = match site_depth_and_type.r#type {
+                SiteType::Ole => context("ole_site_concrete", parse_ole_site_concrete)(data)
+                    .map(|(r, x)| (r, Site::Ole(x)))?,
+            };
+            result.push(site);
+            data = rest;
+        }
+        Ok((data, result))
     }
-    Ok((data, result))
 }
 
 pub fn parse_form_control<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], FormControl, E>
 where
     E: ParseError<&'a [u8]>,
     E: FromExternalError<&'a [u8], u32>,
+    E: ContextError<&'a [u8]>,
 {
     let ap = Cell::new(0usize);
     let _i = input;
 
     // Form Control Header
-    let (_i, _cb_form) = parse_form_control_header(_i)?;
+    let (_i, _cb_form) = context("form_control_header", parse_form_control_header)(_i)?;
 
     // Mask
     let (_i, mask) = ap.bitfield32(_i, FormPropMask::from_bits)?;
@@ -452,7 +456,7 @@ where
 
     // Caption
     let (_i, caption) = if mask.contains(FormPropMask::CAPTION) {
-        parse_string(caption_length)(_i)?
+        context("caption", parse_string(caption_length))(_i)?
     } else {
         (_i, String::from(""))
     };
@@ -465,7 +469,7 @@ where
 
     // Font
     let (_i, font) = if mask.contains(FormPropMask::FONT) {
-        parse_guid_and_font(_i)?
+        context("font", parse_guid_and_font)(_i)?
     } else {
         (_i, GuidAndFont::EMPTY)
     };
@@ -484,14 +488,20 @@ where
             (_ir, x as usize)
         };
 
-    let (_i, site_classes) = count(parse_site_class_info, count_of_site_class_info)(_i)?;
+    let (_i, site_classes) = context(
+        "site_classes",
+        count(parse_site_class_info, count_of_site_class_info),
+    )(_i)?;
 
     // TODO: DesignEx?
     let (_i, count_of_sites) = le_u32(_i)?;
     let (_i, _count_of_bytes) = le_u32(_i)?;
 
-    let (_i, site_depths_and_types) = parse_site_depths_and_types(_i, count_of_sites)?;
-    let (_i, sites) = parse_sites(_i, site_depths_and_types)?;
+    let (_i, site_depths_and_types) = context(
+        "site_depths_and_types",
+        parse_site_depths_and_types(count_of_sites),
+    )(_i)?;
+    let (_i, sites) = context("sites", parse_sites(site_depths_and_types))(_i)?;
 
     Ok((
         _i,
