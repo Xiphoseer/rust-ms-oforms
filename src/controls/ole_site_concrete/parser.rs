@@ -4,7 +4,7 @@ use crate::common::AlignedParser;
 use crate::properties::types::string::{parse_string, stream::CountOfBytesWithCompressionFlag};
 use nom::bytes::complete::tag;
 use nom::combinator::{map, map_opt};
-use nom::error::ParseError;
+use nom::error::{context, ContextError, ParseError};
 use nom::number::complete::le_u16;
 use nom::sequence::preceded;
 use nom::IResult;
@@ -168,15 +168,16 @@ impl<T> AlignedOleSiteParser for T where T: AlignedParser {}
 pub fn parse_ole_site_concrete<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], OleSiteConcrete, E>
 where
     E: ParseError<&'a [u8]>,
+    E: ContextError<&'a [u8]>,
 {
     let ap = Cell::new(0);
     let _i = input;
 
     // Header
-    let (_i, _cb_site) = parse_ole_site_concrete_header(_i)?;
+    let (_i, _cb_site) = context("header", parse_ole_site_concrete_header)(_i)?;
 
     // Mask
-    let (_i, mask) = map_opt(|i| ap.le_u32(i), SitePropMask::from_bits)(_i)?;
+    let (_i, mask) = context("mask", map_opt(|i| ap.le_u32(i), SitePropMask::from_bits))(_i)?;
 
     // Name Data
     let (_i, name_data) = ap.parse_cobwcf(_i, mask, SitePropMask::NAME)?;
