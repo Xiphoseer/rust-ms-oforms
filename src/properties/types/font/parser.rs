@@ -1,5 +1,5 @@
 use super::{FormFont, GuidAndFont};
-use crate::common::{parse_guid, GUID};
+use crate::common::{parse_guid, CLSID_WTF_FONT};
 use nom::bytes::complete::tag;
 use nom::combinator::verify;
 use nom::error::ParseError;
@@ -14,7 +14,7 @@ where
 {
     let (input, guid) = parse_guid(input)?;
     match guid {
-        GUID::WTF_FONT => {
+        CLSID_WTF_FONT => {
             let (input, _v_min) = tag([0x00])(input)?;
             let (input, _v_maj) = tag([0x00])(input)?;
             let (input, _cb_count) = verify(le_u16, |x: &u16| *x == 8)(input)?;
@@ -23,7 +23,7 @@ where
             Ok((
                 input,
                 GuidAndFont {
-                    guid: GUID::WTF_FONT,
+                    guid: CLSID_WTF_FONT,
                     font: FormFont::Unknown1(d1, d2),
                 },
             ))

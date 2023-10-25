@@ -7,8 +7,9 @@
 use crate::controls::ole_site_concrete::OleSiteConcrete;
 #[allow(unused_imports)]
 use num_traits::{FromPrimitive, ToPrimitive};
+use uuid::Uuid;
 
-use crate::common::{VarFlags, VarType, GUID};
+use crate::common::{VarFlags, VarType};
 use crate::properties::types::{
     color::OleColor, font::GuidAndFont, picture::GuidAndPicture, MousePointer, PictureAlignment,
     PictureSizeMode, Position, Size, SpecialEffect,
@@ -270,18 +271,18 @@ pub struct ClassTable {
     ///
     /// The file format default is 0x0000.
     pub set_rowset: u16,
-    /// A GUID, as specified in [MS-DTYP], that specifies the CLSID of a control.
+    /// A Uuid, as specified in [MS-DTYP], that specifies the CLSID of a control.
     ///
     /// The file format default is {00000000-0000-0000-0000-000000000000}.
-    pub cls_id: GUID,
-    /// A GUID, as specified in [MS-DTYP], that specifies the source interface, as specified in
+    pub cls_id: Uuid,
+    /// A Uuid, as specified in [MS-DTYP], that specifies the source interface, as specified in
     /// [MS-OAUT] section 2.2.49.8, in this type information.
     ///
     /// The file format default is {00020400-0000-0000-C000-000000000046}.
-    pub disp_event: GUID,
-    /// A GUID, as specified in [MS-DTYP], that specifies the default interface, as specified in
+    pub disp_event: Uuid,
+    /// A Uuid, as specified in [MS-DTYP], that specifies the default interface, as specified in
     /// [MS-OAUT] section 2.2.49.8, in this type information.
     ///
     /// The file format default is {00020400-0000-0000-C000-000000000046}.
-    pub default_proc: GUID,
+    pub default_proc: Uuid,
 }

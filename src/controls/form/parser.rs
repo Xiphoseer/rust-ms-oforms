@@ -5,10 +5,11 @@ use nom::multi::count;
 use nom::number::complete::{le_u16, le_u32, le_u8};
 use nom::sequence::preceded;
 use nom::IResult;
+use uuid::Uuid;
 
 use super::stream::*;
 use super::*;
-use crate::common::{parse_guid, AlignedParser, VarFlags, VarType};
+use crate::common::{parse_guid, AlignedParser, VarFlags, VarType, CLSID_DEFAULT};
 use crate::controls::ole_site_concrete::parse_ole_site_concrete;
 use crate::properties::types::{
     color::{AlignedColorParser, OleColor},
@@ -135,21 +136,21 @@ where
     let (_i, cls_id) = if mask.contains(ClassInfoPropMask::CLS_ID) {
         parse_guid(_i)?
     } else {
-        (_i, GUID::EMPTY)
+        (_i, Uuid::nil())
     };
 
     // Disp Event
     let (_i, disp_event) = if mask.contains(ClassInfoPropMask::DISP_EVENT) {
         parse_guid(_i)?
     } else {
-        (_i, GUID::DEFAULT)
+        (_i, CLSID_DEFAULT)
     };
 
     // Default Proc
     let (_i, default_proc) = if mask.contains(ClassInfoPropMask::DEFAULT_PROC) {
         parse_guid(_i)?
     } else {
-        (_i, GUID::DEFAULT)
+        (_i, CLSID_DEFAULT)
     };
 
     Ok((

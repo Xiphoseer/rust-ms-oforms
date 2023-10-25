@@ -70,7 +70,7 @@ impl<T: Read + Seek> OFormsFile<T> {
 
     /// Get the form stream (`f`)
     ///
-    /// https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-oforms/cb5df5d6-e090-4bf3-a328-c4edaff0c66b
+    /// See <https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-oforms/cb5df5d6-e090-4bf3-a328-c4edaff0c66b>
     pub fn root_form_stream(&mut self) -> io::Result<cfb::Stream<T>> {
         self.inner.open_stream("/f")
     }

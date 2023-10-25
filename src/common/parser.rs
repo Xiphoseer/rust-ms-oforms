@@ -1,27 +1,33 @@
-use super::{ClipboardFormat, CompObj, CompObjHeader, GUID};
+use super::{ClipboardFormat, CompObj, CompObjHeader};
 use nom::bytes::complete::take;
 use nom::combinator::{map, map_opt, map_res, value, verify};
 use nom::error::{FromExternalError, ParseError};
 use nom::multi::length_data;
-use nom::number::complete::{le_i16, le_i32, le_u16, le_u32, le_u64, le_u8};
+use nom::number::complete::{le_i16, le_i32, le_u16, le_u32, le_u8};
 use nom::IResult;
+use uuid::Uuid;
 
 use std::cell::Cell;
 use std::ffi::{CStr, FromBytesWithNulError};
 
-pub fn check_guid<'a>(guid: GUID) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], GUID> {
+pub fn check_guid<'a>(guid: Uuid) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], Uuid> {
     verify(parse_guid, move |x| x == &guid)
 }
 
-pub fn parse_guid<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], GUID, E>
+pub fn parse_guid<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], Uuid, E>
 where
     E: ParseError<&'a [u8]>,
 {
     let (input, d1) = le_u32(input)?;
     let (input, d2) = le_u16(input)?;
     let (input, d3) = le_u16(input)?;
-    let (input, d4) = le_u64(input)?;
-    Ok((input, GUID(d1, d2, d3, d4)))
+    let mut d4 = [0u8; 8];
+    let (input, _d4) = take(8usize)(input)?;
+    d4.copy_from_slice(_d4);
+    Ok((
+        input,
+        uuid::Builder::from_fields(d1, d2, d3, &d4).into_uuid(),
+    ))
 }
 
 pub trait AlignedParser {

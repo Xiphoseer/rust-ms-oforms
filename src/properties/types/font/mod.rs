@@ -1,7 +1,6 @@
 mod parser;
 pub use parser::*;
-
-use crate::common::GUID;
+use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct StdFont {}
@@ -19,13 +18,13 @@ pub enum FormFont {
 
 #[derive(Debug)]
 pub struct GuidAndFont {
-    pub guid: GUID,
+    pub guid: Uuid,
     pub font: FormFont,
 }
 
 impl GuidAndFont {
     pub const EMPTY: Self = GuidAndFont {
-        guid: GUID::EMPTY,
+        guid: Uuid::nil(),
         font: FormFont::Empty,
     };
 }

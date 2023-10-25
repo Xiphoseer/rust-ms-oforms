@@ -1,4 +1,4 @@
-//use crate::common::GUID;
+//use crate::common::Uuid;
 
 #[derive(Debug)]
 pub struct StdPicture {
