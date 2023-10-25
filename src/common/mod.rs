@@ -1,7 +1,10 @@
 mod parser;
 pub use parser::*;
 
-use std::fmt::{Debug, Error as FmtError, Formatter};
+use std::{
+    ffi::CString,
+    fmt::{Debug, Error as FmtError, Formatter},
+};
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct GUID(pub u32, pub u16, pub u16, pub u64);
@@ -105,4 +108,20 @@ pub enum VarType {
     UIntPtr = 0x0026,
     Array = 0x2000,
     ByRef = 0x4000,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct CompObjHeader;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CompObj {
+    ansi_user_type: CString,
+    ansi_clipboard_format: AnsiClipboardFormat,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AnsiClipboardFormat {
+    None,
+    Standard(u32),
+    Custom(CString),
 }

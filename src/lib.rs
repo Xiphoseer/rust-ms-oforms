@@ -13,13 +13,14 @@
 
 use std::{
     convert::TryFrom,
-    io::{self, Read},
+    io::{self, Read, Seek},
     ops::{Deref, DerefMut},
 };
 
-use cfb::CompoundFile;
+use cfb::{CompoundFile, Stream};
+use common::{parse_comp_obj, CompObj};
 use controls::form::{parse_form_control, FormControl};
-use nom::error::VerboseError;
+use nom::{error::VerboseError, Err};
 
 #[macro_use]
 extern crate bitflags;
@@ -35,7 +36,31 @@ pub struct OFormsFile<F> {
     inner: CompoundFile<F>,
 }
 
-impl<T: Read + io::Seek> OFormsFile<T> {
+fn map_verbose_err(input: &[u8]) -> impl Fn(Err<VerboseError<&[u8]>>) -> io::Error + 'static {
+    let len = input.len();
+    move |e| {
+        io::Error::new(
+            io::ErrorKind::InvalidData,
+            e.map(move |e: VerboseError<&[u8]>| VerboseError {
+                errors: e
+                    .errors
+                    .into_iter()
+                    .map(|(rest, kind)| (len - rest.len(), kind))
+                    .collect(),
+            }),
+        )
+    }
+}
+
+fn read_to_end<T: Read + Seek>(f_stream: &mut Stream<T>) -> io::Result<Vec<u8>> {
+    let f_stream_len = usize::try_from(f_stream.len())
+        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+    let mut bytes: Vec<u8> = Vec::with_capacity(f_stream_len);
+    f_stream.read_to_end(&mut bytes)?;
+    Ok(bytes)
+}
+
+impl<T: Read + Seek> OFormsFile<T> {
     /// Create a new instance by opening the underlying [`cfb::CompoundFile`]
     pub fn open(buf: T) -> io::Result<Self> {
         Ok(Self {
@@ -64,23 +89,17 @@ impl<T: Read + io::Seek> OFormsFile<T> {
         self.inner.open_stream("/\x01CompObj")
     }
 
+    pub fn root_comp_obj(&mut self) -> io::Result<CompObj> {
+        let mut f_stream = self.root_comp_obj_stream()?;
+        let bytes = read_to_end(&mut f_stream)?;
+        let (_rest, form_control) = parse_comp_obj(&bytes).map_err(map_verbose_err(&bytes))?;
+        Ok(form_control)
+    }
+
     pub fn root_form_control(&mut self) -> io::Result<FormControl> {
         let mut f_stream = self.root_form_stream()?;
-        let f_stream_len = usize::try_from(f_stream.len())
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        let mut bytes: Vec<u8> = Vec::with_capacity(f_stream_len);
-        f_stream.read_to_end(&mut bytes)?;
-        let (_rest, form_control) =
-            parse_form_control::<VerboseError<&[u8]>>(&bytes[..]).map_err(|e| {
-                let e = e.map(|e| VerboseError {
-                    errors: e
-                        .errors
-                        .into_iter()
-                        .map(|(rest, kind)| (bytes.len() - rest.len(), kind))
-                        .collect(),
-                });
-                io::Error::new(io::ErrorKind::InvalidData, e)
-            })?;
+        let bytes = read_to_end(&mut f_stream)?;
+        let (_rest, form_control) = parse_form_control(&bytes).map_err(map_verbose_err(&bytes))?;
         Ok(form_control)
     }
 }
