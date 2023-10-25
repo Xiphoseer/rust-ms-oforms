@@ -2,7 +2,7 @@ mod parser;
 pub use parser::*;
 
 use std::{
-    ffi::CString,
+    ffi::{CStr, CString},
     fmt::{Debug, Error as FmtError, Formatter},
 };
 
@@ -116,12 +116,30 @@ pub struct CompObjHeader;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CompObj {
     ansi_user_type: CString,
-    ansi_clipboard_format: AnsiClipboardFormat,
+    ansi_clipboard_format: ClipboardFormat,
 }
 
+/// Clipboard formats
+///
+/// ```c
+/// #define CF_EMBEDSOURCE       "Embed Source"
+/// #define CF_EMBEDDEDOBJECT    "Embedded Object"
+/// #define CF_LINKSOURCE        "Link Source"
+/// #define CF_CUSTOMLINKSOURCE  "Custom Link Source"
+/// #define CF_OBJECTDESCRIPTOR  "Object Descriptor"
+/// #define CF_LINKSRCDESCRIPTOR "Link Source Descriptor"
+/// #define CF_OWNERLINK         "OwnerLink"
+/// #define CF_FILENAME          "FileName"
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum AnsiClipboardFormat {
+pub enum ClipboardFormat {
     None,
     Standard(u32),
     Custom(CString),
+}
+
+impl ClipboardFormat {
+    pub fn custom(c: &CStr) -> Self {
+        Self::Custom(c.to_owned())
+    }
 }

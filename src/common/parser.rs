@@ -1,4 +1,4 @@
-use super::{AnsiClipboardFormat, CompObj, CompObjHeader, GUID};
+use super::{ClipboardFormat, CompObj, CompObjHeader, GUID};
 use nom::bytes::complete::take;
 use nom::combinator::{map, map_opt, map_res, value, verify};
 use nom::error::{FromExternalError, ParseError};
@@ -139,18 +139,19 @@ where
     map_res(length_data(le_u32), CStr::from_bytes_with_nul)(input)
 }
 
-fn parse_ansi_clipboard_format<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], AnsiClipboardFormat, E>
+fn parse_ansi_clipboard_format<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], ClipboardFormat, E>
 where
     E: ParseError<&'a [u8]>,
     E: FromExternalError<&'a [u8], FromBytesWithNulError>,
 {
     let (input, marker_or_length) = le_u32(input)?;
     match marker_or_length {
-        0x00000000 => Ok((input, AnsiClipboardFormat::None)),
-        0xFFFFFFFE | 0xFFFFFFFF => map(le_u32, AnsiClipboardFormat::Standard)(input),
-        len => map(map_res(take(len), CStr::from_bytes_with_nul), |c| {
-            AnsiClipboardFormat::Custom(c.to_owned())
-        })(input),
+        0x00000000 => Ok((input, ClipboardFormat::None)),
+        0xFFFFFFFE | 0xFFFFFFFF => map(le_u32, ClipboardFormat::Standard)(input),
+        len => map(
+            map_res(take(len), CStr::from_bytes_with_nul),
+            ClipboardFormat::custom,
+        )(input),
     }
 }
 
@@ -180,7 +181,7 @@ mod tests {
         parser::{
             parse_ansi_clipboard_format, parse_comp_obj_header, parse_length_prefixed_ansi_string,
         },
-        AnsiClipboardFormat, CompObj, CompObjHeader,
+        ClipboardFormat, CompObj, CompObjHeader,
     };
 
     const DATA: &[u8] = include_bytes!("comp_obj.bin");
@@ -199,7 +200,7 @@ mod tests {
         );
         assert_eq!(
             parse_ansi_clipboard_format::<nom::error::Error<_>>(&DATA[55..]).ok(),
-            Some((&DATA[75..], AnsiClipboardFormat::Custom(fmt.to_owned()))),
+            Some((&DATA[75..], ClipboardFormat::Custom(fmt.to_owned()))),
         );
 
         assert_eq!(
@@ -208,7 +209,7 @@ mod tests {
                 &DATA[75..],
                 CompObj {
                     ansi_user_type: user_type.to_owned(),
-                    ansi_clipboard_format: AnsiClipboardFormat::Custom(fmt.to_owned()),
+                    ansi_clipboard_format: ClipboardFormat::Custom(fmt.to_owned()),
                 }
             ))
         )
