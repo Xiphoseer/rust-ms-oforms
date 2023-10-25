@@ -11,7 +11,7 @@ pub struct TextProps {}
 #[derive(Debug)]
 pub enum FormFont {
     Empty,
-    Unknown1(u32, u32),
+    DdsForm21FontNew(u32, u32),
     StdFont(StdFont),
     TextProps(TextProps),
 }
