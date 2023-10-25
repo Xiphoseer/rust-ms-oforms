@@ -28,6 +28,6 @@ where
                 },
             ))
         }
-        _ => Ok((input, GuidAndFont::EMPTY)),
+        _ => unimplemented!("{}", guid),
     }
 }
