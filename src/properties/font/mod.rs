@@ -34,18 +34,24 @@ bitflags! {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TextProps {}
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FormFont {
     Empty,
-    DdsForm21FontNew(u32, u32),
+    DdsForm21FontNew(DdsForm21FontNew),
     StdFont(StdFont),
     TextProps(TextProps),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DdsForm21FontNew {
+    _d1: u32,
+    _d2: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GuidAndFont {
     pub guid: Uuid,
     pub font: FormFont,

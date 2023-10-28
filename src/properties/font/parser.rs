@@ -1,6 +1,6 @@
 use std::num::NonZeroU32;
 
-use super::{FontFlags, FormFont, GuidAndFont, StdFont};
+use super::{DdsForm21FontNew, FontFlags, FormFont, GuidAndFont, StdFont};
 use crate::common::{parse_guid, CLSID_DT_DDSFORM_21_FONT_NEW, CLSID_STD_FONT};
 use nom::bytes::complete::tag;
 use nom::combinator::{map, map_opt, verify};
@@ -37,32 +37,30 @@ where
     ))
 }
 
+fn parse_dds_form21_font_new<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], DdsForm21FontNew, E>
+where
+    E: ParseError<&'a [u8]>,
+{
+    let (input, _v) = tag([0x00, 0x00])(input)?;
+    let (input, _cb_count) = verify(le_u16, |x: &u16| *x == 8)(input)?;
+    let (input, _d1) = le_u32(input)?;
+    let (input, _d2) = le_u32(input)?;
+    Ok((input, DdsForm21FontNew { _d1, _d2 }))
+}
+
 pub fn parse_guid_and_font<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], GuidAndFont, E>
 where
     E: ParseError<&'a [u8]>,
 {
     let (input, guid) = parse_guid(input)?;
-    match guid {
+    let (input, font) = match guid {
         CLSID_DT_DDSFORM_21_FONT_NEW => {
-            let (input, _v_min) = tag([0x00])(input)?;
-            let (input, _v_maj) = tag([0x00])(input)?;
-            let (input, _cb_count) = verify(le_u16, |x: &u16| *x == 8)(input)?;
-            let (input, d1) = le_u32(input)?;
-            let (input, d2) = le_u32(input)?;
-            Ok((
-                input,
-                GuidAndFont {
-                    guid,
-                    font: FormFont::DdsForm21FontNew(d1, d2),
-                },
-            ))
+            map(parse_dds_form21_font_new, FormFont::DdsForm21FontNew)(input)
         }
-        CLSID_STD_FONT => {
-            let (input, font) = map(parse_std_font, FormFont::StdFont)(input)?;
-            Ok((input, GuidAndFont { guid, font }))
-        }
+        CLSID_STD_FONT => map(parse_std_font, FormFont::StdFont)(input),
         _ => unimplemented!("{}", guid),
-    }
+    }?;
+    Ok((input, GuidAndFont { guid, font }))
 }
 
 #[cfg(test)]
