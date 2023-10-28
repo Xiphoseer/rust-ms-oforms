@@ -1,7 +1,7 @@
 use std::num::NonZeroU32;
 
 use super::{FontFlags, FormFont, GuidAndFont, StdFont};
-use crate::common::{parse_guid, CLSID_DT_DDSFORM_21_FONT_NEW};
+use crate::common::{parse_guid, CLSID_DT_DDSFORM_21_FONT_NEW, CLSID_STD_FONT};
 use nom::bytes::complete::tag;
 use nom::combinator::{map, map_opt, verify};
 use nom::error::ParseError;
@@ -52,10 +52,14 @@ where
             Ok((
                 input,
                 GuidAndFont {
-                    guid: CLSID_DT_DDSFORM_21_FONT_NEW,
+                    guid,
                     font: FormFont::DdsForm21FontNew(d1, d2),
                 },
             ))
+        }
+        CLSID_STD_FONT => {
+            let (input, font) = map(parse_std_font, FormFont::StdFont)(input)?;
+            Ok((input, GuidAndFont { guid, font }))
         }
         _ => unimplemented!("{}", guid),
     }
