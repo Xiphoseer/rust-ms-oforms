@@ -14,13 +14,17 @@
 use std::{
     convert::TryFrom,
     io::{self, Read, Seek},
-    ops::{Deref, DerefMut},
+    ops::{Deref, DerefMut, Range},
 };
 
 use cfb::{CompoundFile, Stream};
 use common::{parse_comp_obj, CompObj};
-use controls::form::{parse_form_control, FormControl};
+use controls::{
+    form::{parse_form_control, ClassTable, FormControl, Site},
+    ole_site_concrete::{Clsid, OleSiteConcrete},
+};
 use nom::{error::VerboseError, Err};
+use uuid::Uuid;
 
 #[macro_use]
 extern crate bitflags;
@@ -58,6 +62,56 @@ fn read_to_end<T: Read + Seek>(f_stream: &mut Stream<T>) -> io::Result<Vec<u8>> 
     let mut bytes: Vec<u8> = Vec::with_capacity(f_stream_len);
     f_stream.read_to_end(&mut bytes)?;
     Ok(bytes)
+}
+
+pub struct Form<F> {
+    form_control: FormControl,
+    obj_stream: Stream<F>,
+}
+
+impl<F> Form<F> {
+    pub fn site_iter(&mut self) -> SiteIter<'_, F> {
+        SiteIter {
+            stream: &mut self.obj_stream,
+            range: 0..0,
+            sites: self.form_control.sites.iter(),
+            classes: &self.form_control.site_classes,
+        }
+    }
+}
+
+pub struct SiteIter<'a, F> {
+    stream: &'a mut Stream<F>,
+    range: Range<usize>,
+    sites: std::slice::Iter<'a, Site>,
+    classes: &'a [ClassTable],
+}
+
+impl<'a, F: Read + Seek> SiteIter<'a, F> {
+    pub fn site_stream(&mut self) -> io::Result<std::io::Take<&mut cfb::Stream<F>>> {
+        self.stream
+            .seek(io::SeekFrom::Start(self.range.start as u64))?;
+        Ok(self.stream.take(self.range.len() as u64))
+    }
+}
+
+impl<'a, F> Iterator for SiteIter<'a, F> {
+    type Item = (Uuid, &'a OleSiteConcrete);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(s) = self.sites.next() {
+            let Site::Ole(ole_site) = s;
+            self.range = self.range.end..self.range.end + (ole_site.object_stream_size as usize);
+            let clsid = match ole_site.clsid_cache_index {
+                Clsid::ClassTable(c) => self.classes.get(c as usize).unwrap().cls_id,
+                Clsid::Invalid => todo!(),
+                Clsid::Global(_) => todo!(),
+            };
+            Some((clsid, ole_site))
+        } else {
+            None
+        }
+    }
 }
 
 impl<T: Read + Seek> OFormsFile<T> {
@@ -101,6 +155,15 @@ impl<T: Read + Seek> OFormsFile<T> {
         let bytes = read_to_end(&mut f_stream)?;
         let (_rest, form_control) = parse_form_control(&bytes).map_err(map_verbose_err(&bytes))?;
         Ok(form_control)
+    }
+
+    pub fn root_form(&mut self) -> io::Result<Form<T>> {
+        let form_control = self.root_form_control()?;
+        let obj_stream = self.root_object_stream()?;
+        Ok(Form {
+            form_control,
+            obj_stream,
+        })
     }
 }
 
