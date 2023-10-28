@@ -1,5 +1,4 @@
 mod parser;
-use bstr::BString;
 pub use parser::*;
 use std::num::NonZeroU32;
 use uuid::Uuid;
@@ -18,7 +17,7 @@ pub struct StdFont {
     /// MUST be greater than zero and less than or equal to 655350000.
     pub height: NonZeroU32,
     /// An ASCII string that specifies the name of the font.
-    pub font_face: BString,
+    pub font_face: String,
 }
 
 bitflags! {

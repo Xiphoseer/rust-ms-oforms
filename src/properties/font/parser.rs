@@ -2,7 +2,6 @@ use std::num::NonZeroU32;
 
 use super::{FontFlags, FormFont, GuidAndFont, StdFont};
 use crate::common::{parse_guid, CLSID_DT_DDSFORM_21_FONT_NEW};
-use bstr::BString;
 use nom::bytes::complete::tag;
 use nom::combinator::{map, map_opt, verify};
 use nom::error::ParseError;
@@ -24,7 +23,7 @@ where
     let (input, height) = map_opt(le_u32, NonZeroU32::new)(input)?;
     let (input, font_face) = map(
         verify(length_data(verify(le_u8, |x| *x < 32)), <[u8]>::is_ascii),
-        BString::from,
+        |b: &[u8]| unsafe { String::from_utf8_unchecked(b.to_vec()) },
     )(input)?;
     Ok((
         input,
@@ -70,7 +69,6 @@ mod tests {
         super::{FontFlags, StdFont},
         parse_std_font,
     };
-    use bstr::BString;
 
     #[test]
     fn test_parse_std_font() {
@@ -87,7 +85,7 @@ mod tests {
                     flags: FontFlags::empty(),
                     weight: 0x190,
                     height: NonZeroU32::new(0x14244).unwrap(),
-                    font_face: BString::from("Tahoma"),
+                    font_face: String::from("Tahoma"),
                 }
             ))
         )
