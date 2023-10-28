@@ -63,9 +63,7 @@ impl OleColor {
 mod tests {
     use std::convert::TryFrom;
 
-    use crate::properties::types::color::parse_ole_color;
-
-    use super::{OleColor, RgbColor};
+    use super::{parse_ole_color, OleColor, RgbColor};
 
     #[test]
     fn test_color() {

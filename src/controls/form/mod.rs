@@ -10,7 +10,7 @@ use num_traits::{FromPrimitive, ToPrimitive};
 use uuid::Uuid;
 
 use crate::common::{VarFlags, VarType};
-use crate::properties::types::{
+use crate::properties::{
     color::OleColor, font::GuidAndFont, picture::GuidAndPicture, MousePointer, PictureAlignment,
     PictureSizeMode, Position, Size, SpecialEffect,
 };

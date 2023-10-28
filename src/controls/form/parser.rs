@@ -11,7 +11,7 @@ use super::stream::*;
 use super::*;
 use crate::common::{parse_guid, AlignedParser, VarFlags, VarType, CLSID_DEFAULT};
 use crate::controls::ole_site_concrete::parse_ole_site_concrete;
-use crate::properties::types::{
+use crate::properties::{
     color::{AlignedColorParser, OleColor},
     font::parse_guid_and_font,
     parse_position, parse_size,

@@ -5,7 +5,7 @@ use std::num::NonZeroU16;
 pub use parser::*;
 pub mod stream;
 
-use crate::properties::types::Position;
+use crate::properties::Position;
 
 bitflags! {
     /// Specifies Boolean properties of an embedded control on a form.

@@ -1,7 +1,7 @@
 use super::stream::*;
 use super::*;
 use crate::common::AlignedParser;
-use crate::properties::types::string::{parse_string, stream::CountOfBytesWithCompressionFlag};
+use crate::properties::string::{parse_string, stream::CountOfBytesWithCompressionFlag};
 use nom::bytes::complete::{tag, take};
 use nom::combinator::{map, map_opt, map_parser};
 use nom::error::{context, ContextError, ParseError};
