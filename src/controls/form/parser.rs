@@ -90,9 +90,9 @@ where
 
     // Bind Type
     let (_i, bind_type) = if mask.contains(ClassInfoPropMask::BIND_TYPE) {
-        ap.bitfield16(_i, VarType::from_u16)?
+        ap.bitfield16(_i, VarType::from_bits)?
     } else {
-        (_i, VarType::Empty)
+        (_i, VarType::EMPTY)
     };
 
     // Get Value Index
@@ -111,9 +111,9 @@ where
 
     // Value Type
     let (_i, value_type) = if mask.contains(ClassInfoPropMask::VALUE_TYPE) {
-        ap.bitfield16(_i, VarType::from_u16)?
+        ap.bitfield16(_i, VarType::from_bits)?
     } else {
-        (_i, VarType::Empty)
+        (_i, VarType::EMPTY)
     };
 
     // DispID Rowset

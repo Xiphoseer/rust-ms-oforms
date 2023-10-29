@@ -57,45 +57,46 @@ bitflags! {
     }
 }
 
-#[repr(u16)]
-#[derive(Debug, FromPrimitive, ToPrimitive, PartialEq, Eq)]
-pub enum VarType {
-    Empty = 0x0000,
-    Null = 0x0001,
-    I2 = 0x0002,
-    I4 = 0x0003,
-    R4 = 0x0004,
-    R8 = 0x0005,
-    Cy = 0x0006,
-    Date = 0x0007,
-    BStr = 0x0008,
-    Dispatch = 0x0009,
-    Error = 0x000A,
-    Bool = 0x000B,
-    Variant = 0x000C,
-    Unknown = 0x000D,
-    Decimal = 0x000E,
-    I1 = 0x0010,
-    UI1 = 0x0011,
-    UI2 = 0x0012,
-    UI4 = 0x0013,
-    I8 = 0x0014,
-    UI8 = 0x0015,
-    Int = 0x0016,
-    UInt = 0x0017,
-    Void = 0x0018,
-    HResult = 0x0019,
-    Ptr = 0x001A,
-    Safearray = 0x001B,
-    CArray = 0x001C,
-    UserDefined = 0x001D,
-    LPStr = 0x001E,
-    LPWStr = 0x001F,
-    Record = 0x0024,
-    IntPtr = 0x0025,
-    UIntPtr = 0x0026,
-    Array = 0x2000,
-    ByRef = 0x4000,
+bitflags! {
+    #[derive(Debug, PartialEq, Eq)]
+    pub struct VarType : u16 {
+        const EMPTY = 0x0000;
+        const NULL = 0x0001;
+        const I2 = 0x0002;
+        const I4 = 0x0003;
+        const R4 = 0x0004;
+        const R8 = 0x0005;
+        const CY = 0x0006;
+        const DATE = 0x0007;
+        const BSTR = 0x0008;
+        const DISPATCH = 0x0009;
+        const ERROR = 0x000A;
+        const BOOL = 0x000B;
+        const VARIANT = 0x000C;
+        const UNKNOWN = 0x000D;
+        const DECIMAL = 0x000E;
+        const I1 = 0x0010;
+        const UI1 = 0x0011;
+        const UI2 = 0x0012;
+        const UI4 = 0x0013;
+        const I8 = 0x0014;
+        const UI8 = 0x0015;
+        const INT = 0x0016;
+        const UINT = 0x0017;
+        const VOID = 0x0018;
+        const HRESULT = 0x0019;
+        const PTR = 0x001A;
+        const SAFEARRAY = 0x001B;
+        const CARRAY = 0x001C;
+        const USERDEFINED = 0x001D;
+        const LPSTR = 0x001E;
+        const LPWSTR = 0x001F;
+        const RECORD = 0x0024;
+        const INTPTR = 0x0025;
+        const UINTPTR = 0x0026;
+        const ARRAY = 0x2000;
+        const BYREF = 0x4000;
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
