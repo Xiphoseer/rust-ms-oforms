@@ -1,3 +1,4 @@
+#![doc(html_root_url = "https://xiphoseer.de/rust-ms-oforms")]
 //! # MS-OFORMS Implementation
 //!
 //! This project aims to be a rust-native implementation of [MS-OFORMS]
