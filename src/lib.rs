@@ -87,6 +87,11 @@ impl<F> Form<F> {
     pub fn form_control(&self) -> &FormControl {
         &self.form_control
     }
+
+    /// Get the parsed [`FormControl`] by value, discarding the objects stream
+    pub fn into_form_control(self) -> FormControl {
+        self.form_control
+    }
 }
 
 pub struct SiteIter<'a, F> {
