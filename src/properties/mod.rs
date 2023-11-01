@@ -13,7 +13,7 @@ pub mod picture;
 pub mod string;
 
 /// An unsigned integer that specifies the type of icon displayed as the mouse pointer for the control.
-#[derive(Debug, FromPrimitive, ToPrimitive)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum MousePointer {
     /// Standard pointer.
     Default = 0x00,
@@ -50,7 +50,7 @@ pub enum MousePointer {
 /// Specifies the visual appearance of the control.
 ///
 /// In this enumeration, "form" refers to the surface on which the control appears.
-#[derive(Debug, FromPrimitive, ToPrimitive)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum SpecialEffect {
     /// Control appears flat.
     Flat = 0x00,
@@ -65,7 +65,7 @@ pub enum SpecialEffect {
 }
 
 /// Specifies the alignment of the picture in the Form or Image.
-#[derive(Debug, FromPrimitive, ToPrimitive)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum PictureAlignment {
     /// The top-left corner.
     TopLeft = 0x00,
@@ -80,7 +80,7 @@ pub enum PictureAlignment {
 }
 
 /// Specifies how to display the picture.
-#[derive(Debug, FromPrimitive, ToPrimitive)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum PictureSizeMode {
     /// Crops any part of the picture that is larger than the control boundaries.
     Clip = 0x00,
@@ -92,7 +92,7 @@ pub enum PictureSizeMode {
 
 pub type HiMetric = u32;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Specifies a pair of signed integers that specify the size of a control.
 pub struct Size {
     /// A signed integer that specifies the width, in HIMETRIC units, of the control.
@@ -103,7 +103,7 @@ pub struct Size {
 
 pub type SignedHiMetric = i32;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Specifies a pair of signed integers that specify a position relative to a reference point.
 pub struct Position {
     /// A signed integer that specifies, in HIMETRIC units, a distance below the reference point.

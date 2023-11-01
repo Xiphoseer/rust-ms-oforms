@@ -22,7 +22,7 @@ impl RgbColor {
 pub type PaletteEntry = u16;
 
 #[repr(u8)]
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[allow(dead_code)]
 enum OleColorType {
     Default = 0x00,
