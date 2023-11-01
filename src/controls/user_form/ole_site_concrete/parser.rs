@@ -137,7 +137,7 @@ pub trait AlignedOleSiteParser: AlignedParser {
     {
         if mask.contains(flag) {
             let (input, s) = parse_string(length_and_compression)(input)?;
-            self.inc(s.len());
+            self.inc(length_and_compression.len() as usize);
             Ok((input, s))
         } else {
             Ok((input, String::from("")))
@@ -228,7 +228,8 @@ where
     let (_i, control_source_data) = ap.parse_cobwcf(_i, mask, SitePropMask::CONTROL_SOURCE)?;
     let (_i, row_source_data) = ap.parse_cobwcf(_i, mask, SitePropMask::ROW_SOURCE)?;
 
-    ap.align(_i, 4)?;
+    let (_i, _) = ap.align(_i, 4)?; // Padding5 (variable): MUST be set to zero. The size of this field is the least number of bytes required to make the total size, in bytes, of this SiteDataBlock divisible by 4.
+
     let (_i, name) = ap.parse_str(_i, mask, SitePropMask::NAME, name_data)?;
 
     //ap.align(_i, 4)?;
