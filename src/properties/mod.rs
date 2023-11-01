@@ -1,3 +1,7 @@
+//! ## 2.4 Property Types
+//!
+//! Specifies data types that are used by more than one control.
+
 #[allow(unused_imports)]
 use num_traits::{FromPrimitive, ToPrimitive};
 

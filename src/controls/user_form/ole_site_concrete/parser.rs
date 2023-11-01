@@ -165,7 +165,9 @@ pub trait AlignedOleSiteParser: AlignedParser {
 
 impl<T> AlignedOleSiteParser for T where T: AlignedParser {}
 
-pub fn parse_ole_site_concrete<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], OleSiteConcrete, E>
+pub fn parse_ole_site_concrete<'a, E>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], OleSiteConcreteControl, E>
 where
     E: ParseError<&'a [u8]>,
     E: ContextError<&'a [u8]>,
@@ -175,7 +177,7 @@ where
     map_parser(take(cb_site), _parse_ole_site_concrete)(input)
 }
 
-fn _parse_ole_site_concrete<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], OleSiteConcrete, E>
+fn _parse_ole_site_concrete<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], OleSiteConcreteControl, E>
 where
     E: ParseError<&'a [u8]>,
     E: ContextError<&'a [u8]>,
@@ -260,7 +262,7 @@ where
 
     Ok((
         _i,
-        OleSiteConcrete {
+        OleSiteConcreteControl {
             id,
             help_context_id,
             bit_flags,

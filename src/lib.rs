@@ -20,9 +20,10 @@ use std::{
 
 use cfb::{CompoundFile, Stream};
 use common::{parse_comp_obj, CompObj};
-use controls::{
-    form::{parse_form_control, ClassTable, FormControl, Site},
-    ole_site_concrete::{Clsid, OleSiteConcrete},
+use controls::user_form::{
+    class_table::SiteClassInfo,
+    ole_site_concrete::{Clsid, OleSiteConcreteControl},
+    parse_form_control, FormControl, Site,
 };
 use nom::{error::VerboseError, Err};
 use uuid::Uuid;
@@ -65,12 +66,14 @@ fn read_to_end<T: Read + Seek>(f_stream: &mut Stream<T>) -> io::Result<Vec<u8>> 
     Ok(bytes)
 }
 
+/// A parsed form stream
 pub struct Form<F> {
     form_control: FormControl,
     obj_stream: Stream<F>,
 }
 
 impl<F> Form<F> {
+    /// Return an iterator over all sites
     pub fn site_iter(&mut self) -> SiteIter<'_, F> {
         SiteIter {
             stream: &mut self.obj_stream,
@@ -79,13 +82,18 @@ impl<F> Form<F> {
             classes: &self.form_control.site_classes,
         }
     }
+
+    /// Get the parsed [`FormControl`]
+    pub fn form_control(&self) -> &FormControl {
+        &self.form_control
+    }
 }
 
 pub struct SiteIter<'a, F> {
     stream: &'a mut Stream<F>,
     range: Range<usize>,
     sites: std::slice::Iter<'a, Site>,
-    classes: &'a [ClassTable],
+    classes: &'a [SiteClassInfo],
 }
 
 impl<'a, F: Read + Seek> SiteIter<'a, F> {
@@ -97,7 +105,7 @@ impl<'a, F: Read + Seek> SiteIter<'a, F> {
 }
 
 impl<'a, F> Iterator for SiteIter<'a, F> {
-    type Item = (Uuid, &'a OleSiteConcrete);
+    type Item = (Uuid, &'a OleSiteConcreteControl);
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(s) = self.sites.next() {

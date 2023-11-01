@@ -56,7 +56,7 @@ pub enum Clsid {
 
 /// Specifies properties stored for each embedded control in a UserForm control.
 #[derive(Debug)]
-pub struct OleSiteConcrete {
+pub struct OleSiteConcreteControl {
     pub id: i32,
     pub help_context_id: i32,
     /// A SITE_FLAG that specifies Boolean properties of an embedded control on a form.

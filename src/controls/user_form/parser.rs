@@ -5,17 +5,25 @@ use nom::multi::count;
 use nom::number::complete::{le_u16, le_u32, le_u8};
 use nom::sequence::preceded;
 use nom::IResult;
+use num_traits::FromPrimitive;
 use uuid::Uuid;
 
-use super::stream::*;
-use super::*;
+use super::ole_site_concrete::parse_ole_site_concrete;
+use super::{
+    stream::*, BorderStyle, ClsTableFlags, Cycle, FormControl, FormFlags, FormScrollBarFlags, Site,
+    SiteClassInfo,
+};
 use crate::common::{parse_guid, AlignedParser, VarFlags, VarType, CLSID_DEFAULT};
-use crate::controls::ole_site_concrete::parse_ole_site_concrete;
+use crate::properties::font::GuidAndFont;
+use crate::properties::picture::GuidAndPicture;
 use crate::properties::{
     color::{AlignedColorParser, OleColor},
     font::parse_guid_and_font,
     parse_position, parse_size,
     string::{parse_string, stream::CountOfBytesWithCompressionFlag},
+};
+use crate::properties::{
+    MousePointer, PictureAlignment, PictureSizeMode, Position, Size, SpecialEffect,
 };
 
 use std::cell::Cell;
@@ -33,7 +41,7 @@ where
     preceded(tag([0x00, 0x00]), le_u16)(input)
 }
 
-pub fn parse_site_class_info<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], ClassTable, E>
+pub fn parse_site_class_info<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], SiteClassInfo, E>
 where
     E: ParseError<&'a [u8]>,
 {
@@ -155,7 +163,7 @@ where
 
     Ok((
         _i,
-        ClassTable {
+        SiteClassInfo {
             class_table_flags,
             var_flags,
             count_of_methods,
