@@ -70,8 +70,14 @@ bitflags! {
     }
 }
 
-#[derive(Debug)]
-pub enum Site {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Site {
+    pub depth: u8,
+    pub kind: SiteKind,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SiteKind {
     Ole(OleSiteConcreteControl),
 }
 

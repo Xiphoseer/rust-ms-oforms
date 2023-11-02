@@ -23,7 +23,7 @@ use common::{parse_comp_obj, CompObj};
 use controls::user_form::{
     class_table::SiteClassInfo,
     ole_site_concrete::{Clsid, OleSiteConcreteControl},
-    parse_form_control, FormControl, Site,
+    parse_form_control, FormControl, Site, SiteKind,
 };
 use nom::{error::VerboseError, Err};
 use uuid::Uuid;
@@ -110,18 +110,22 @@ impl<'a, F: Read + Seek> SiteIter<'a, F> {
 }
 
 impl<'a, F> Iterator for SiteIter<'a, F> {
-    type Item = (Uuid, &'a OleSiteConcreteControl);
+    /// The elements are:
+    /// - CLSID of the control
+    /// - "depth"
+    /// - reference to the OleSiteConcreteControl
+    type Item = (Uuid, u8, &'a OleSiteConcreteControl);
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(s) = self.sites.next() {
-            let Site::Ole(ole_site) = s;
+            let SiteKind::Ole(ole_site) = &s.kind;
             self.range = self.range.end..self.range.end + (ole_site.object_stream_size as usize);
             let clsid = match ole_site.clsid_cache_index {
                 Clsid::ClassTable(c) => self.classes.get(c as usize).unwrap().cls_id,
                 Clsid::Invalid => todo!(),
                 Clsid::Global(_) => todo!(),
             };
-            Some((clsid, ole_site))
+            Some((clsid, s.depth, ole_site))
         } else {
             None
         }

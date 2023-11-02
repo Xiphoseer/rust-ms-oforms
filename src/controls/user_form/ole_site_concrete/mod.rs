@@ -13,7 +13,7 @@ bitflags! {
     /// Unless otherwise specified,
     /// each bit applies to all control types. All bits that do not apply to a particular type of
     /// control MUST be set to zero for that control.
-    #[derive(Debug)]
+    #[derive(Debug, Clone, PartialEq, Eq)]
     pub struct SiteFlags: u32 {
         /// Specifies whether the control can receive focus while the user is navigating
         /// controls using the TAB key.
@@ -47,7 +47,7 @@ bitflags! {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Clsid {
     ClassTable(u16),
     Invalid,
@@ -55,7 +55,7 @@ pub enum Clsid {
 }
 
 /// Specifies properties stored for each embedded control in a UserForm control.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OleSiteConcreteControl {
     pub id: i32,
     pub help_context_id: i32,

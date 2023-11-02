@@ -1,5 +1,5 @@
 use nom::bytes::complete::tag;
-use nom::combinator::{map_opt, success, verify};
+use nom::combinator::{map, map_opt, success, verify};
 use nom::error::{context, ContextError, FromExternalError, ParseError};
 use nom::multi::count;
 use nom::number::complete::{le_u16, le_u32, le_u8};
@@ -11,7 +11,7 @@ use uuid::Uuid;
 use super::ole_site_concrete::parse_ole_site_concrete;
 use super::{
     stream::*, BorderStyle, ClsTableFlags, Cycle, FormControl, FormFlags, FormScrollBarFlags, Site,
-    SiteClassInfo,
+    SiteClassInfo, SiteKind,
 };
 use crate::common::{parse_guid, AlignedParser, VarFlags, VarType, CLSID_DEFAULT};
 use crate::properties::font::GuidAndFont;
@@ -254,8 +254,12 @@ where
         let mut data = input;
         for site_depth_and_type in &site_depths_and_types {
             let (rest, site) = match site_depth_and_type.r#type {
-                SiteType::Ole => context("ole_site_concrete", parse_ole_site_concrete)(data)
-                    .map(|(r, x)| (r, Site::Ole(x)))?,
+                SiteType::Ole => map(context("ole_site_concrete", parse_ole_site_concrete), |x| {
+                    Site {
+                        kind: SiteKind::Ole(x),
+                        depth: site_depth_and_type.depth,
+                    }
+                })(data)?,
             };
             result.push(site);
             data = rest;
