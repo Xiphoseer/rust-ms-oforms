@@ -11,6 +11,12 @@ pub struct RgbColor {
     pub red: u8,
 }
 
+impl fmt::Display for RgbColor {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "#{:02X}{:02X}{:02X}", self.red, self.green, self.blue)
+    }
+}
+
 impl RgbColor {
     pub const fn from_rgb(red: u8, green: u8, blue: u8) -> Self {
         Self { red, green, blue }
