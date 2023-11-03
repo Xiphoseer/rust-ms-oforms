@@ -82,16 +82,56 @@ pub enum SystemColor {
     ButtonText = 0x12,
     /// Color of text in an inactive caption
     InactiveCaptionText = 0x13,
-    /// Highlight color for 3-D display elements
+    /// Highlight color for 3-D display elements (aka `ButtonHilight`)
     _3DHighlight = 0x14,
-    /// Darkest shadow color for 3-D display elements
+    /// Darkest shadow color for 3-D display elements (aka `ButtonDkShadow`)
     _3DDKShadow = 0x15,
-    /// Second lightest 3-D color after vb3DHighlight
+    /// Second lightest 3-D color after vb3DHighlight (aka `ButtonLight`)
     _3DLight = 0x16,
     /// Color of text in ToolTips
     InfoText = 0x17,
-    /// Background color of ToolTips
+    /// Background color of ToolTips (aka `InfoWindow`)
     InfoBackground = 0x18,
+}
+
+impl From<SystemColor> for RgbColor {
+    fn from(value: SystemColor) -> Self {
+        match value {
+            SystemColor::ScrollBars => RgbColor::from_rgb(200, 200, 200),
+            SystemColor::Desktop => RgbColor::from_rgb(0, 0, 0),
+            SystemColor::ActiveTitleBar => RgbColor::from_rgb(153, 180, 209),
+            SystemColor::InactiveTitleBar => RgbColor::from_rgb(191, 205, 219),
+            SystemColor::MenuBar => RgbColor::from_rgb(255, 255, 255),
+            SystemColor::WindowBackground => RgbColor::from_rgb(255, 255, 255),
+            SystemColor::WindowFrame => RgbColor::from_rgb(100, 100, 100),
+            SystemColor::MenuText => RgbColor::from_rgb(0, 0, 0),
+            SystemColor::WindowText => RgbColor::from_rgb(0, 0, 0),
+            SystemColor::TitleBarText => RgbColor::from_rgb(0, 0, 0),
+            SystemColor::ActiveBorder => RgbColor::from_rgb(180, 180, 180),
+            SystemColor::InactiveBorder => RgbColor::from_rgb(244, 247, 252),
+            SystemColor::ApplicationWorkspace => RgbColor::from_rgb(171, 171, 171),
+            SystemColor::Highlight => RgbColor::from_rgb(0, 120, 215),
+            SystemColor::HighlightText => RgbColor::from_rgb(255, 255, 255),
+            SystemColor::ButtonFace => RgbColor::from_rgb(255, 255, 255),
+            SystemColor::ButtonShadow => RgbColor::from_rgb(160, 160, 160),
+            SystemColor::GrayText => RgbColor::from_rgb(109, 109, 109),
+            SystemColor::ButtonText => RgbColor::from_rgb(0, 0, 0),
+            SystemColor::InactiveCaptionText => RgbColor::from_rgb(0, 0, 0),
+            SystemColor::_3DHighlight => RgbColor::from_rgb(255, 255, 255),
+            SystemColor::_3DDKShadow => RgbColor::from_rgb(105, 105, 105),
+            SystemColor::_3DLight => RgbColor::from_rgb(227, 227, 227),
+            SystemColor::InfoText => RgbColor::from_rgb(0, 0, 0),
+            SystemColor::InfoBackground => RgbColor::from_rgb(255, 255, 225),
+            /*
+            SystemColor::ButtonAlternateFace => RgbColor::from_rgb(255, 255, 255),
+            SystemColor::HotTrackingColor => RgbColor::from_rgb(0, 102, 204),
+            SystemColor::GradientActiveTitle => RgbColor::from_rgb(185, 209, 234),
+            SystemColor::GradientInactiveTitle => RgbColor::from_rgb(215, 228, 242),
+            SystemColor::MenuHilight => RgbColor::from_rgb(51, 153, 255),
+            SystemColor::MenuBar => RgbColor::from_rgb(255, 255, 255)
+            */
+        }
+    }
 }
 
 impl SystemColor {
@@ -160,8 +200,14 @@ impl TryFrom<u32> for OleColor {
 }
 
 impl OleColor {
+    pub const _3DDKSHADOW: Self = SystemColor::_3DDKShadow.as_ole_color();
+    pub const _3DFACE: Self = SystemColor::ButtonFace.as_ole_color();
+    pub const _3DHIGHLIGHT: Self = SystemColor::_3DHighlight.as_ole_color();
     pub const BTNFACE: Self = SystemColor::ButtonFace.as_ole_color();
     pub const BTNTEXT: Self = SystemColor::ButtonText.as_ole_color();
+    pub const WINDOWTEXT: Self = SystemColor::WindowText.as_ole_color();
+    pub const WINDOW: Self = SystemColor::WindowBackground.as_ole_color();
+    pub const WINDOWFRAME: Self = SystemColor::WindowFrame.as_ole_color();
 }
 
 #[cfg(test)]
