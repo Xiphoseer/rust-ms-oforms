@@ -36,6 +36,10 @@ pub enum OleColor {
     Default(RgbColor),
     PaletteEntry(PaletteEntry),
     RgbColor(RgbColor),
+    /// See also:
+    ///
+    /// - <https://learn.microsoft.com/de-de/windows/win32/api/winuser/nf-winuser-getsyscolor>
+    /// - <https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/system-color-constants>
     SystemPalette(PaletteEntry),
 }
 
