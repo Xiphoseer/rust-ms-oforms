@@ -16,6 +16,7 @@ use std::{
     convert::TryFrom,
     io::{self, Read, Seek},
     ops::{Deref, DerefMut, Range},
+    path::{Path, PathBuf},
 };
 
 use cfb::{CompoundFile, Stream};
@@ -40,6 +41,7 @@ pub mod properties;
 /// An OForms file is a [`cfb::CompoundFile`].
 pub struct OFormsFile<F> {
     inner: CompoundFile<F>,
+    prefix: PathBuf,
 }
 
 fn map_verbose_err(input: &[u8]) -> impl Fn(Err<VerboseError<&[u8]>>) -> io::Error + 'static {
@@ -137,28 +139,41 @@ impl<T: Read + Seek> OFormsFile<T> {
     pub fn open(buf: T) -> io::Result<Self> {
         Ok(Self {
             inner: CompoundFile::open(buf)?,
+            prefix: PathBuf::from("/"),
         })
+    }
+
+    /// Create a new instance by opening the underlying [`cfb::CompoundFile`]
+    pub fn open_in(buf: T, prefix: PathBuf) -> io::Result<Self> {
+        Ok(Self {
+            inner: CompoundFile::open(buf)?,
+            prefix,
+        })
+    }
+
+    pub fn open_stream<P: AsRef<Path>>(&mut self, path: P) -> io::Result<cfb::Stream<T>> {
+        self.inner.open_stream(self.prefix.join(path))
     }
 
     /// Get the form stream (`f`)
     ///
     /// See <https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-oforms/cb5df5d6-e090-4bf3-a328-c4edaff0c66b>
     pub fn root_form_stream(&mut self) -> io::Result<cfb::Stream<T>> {
-        self.inner.open_stream("/f")
+        self.open_stream("f")
     }
 
     /// Get the object stream (`o`)
     ///
     /// See <https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-oforms/15778df8-8a8e-45dc-933b-f914f4e011cf>
     pub fn root_object_stream(&mut self) -> io::Result<cfb::Stream<T>> {
-        self.inner.open_stream("/o")
+        self.open_stream("o")
     }
 
     /// Get the CompObj stream (`\001CompObj`)
     ///
     /// See: <https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-oforms/a0043a76-919e-4d2a-9a90-83daacbfaba2>
     pub fn root_comp_obj_stream(&mut self) -> io::Result<cfb::Stream<T>> {
-        self.inner.open_stream("/\x01CompObj")
+        self.open_stream("\x01CompObj")
     }
 
     pub fn root_comp_obj(&mut self) -> io::Result<CompObj> {
