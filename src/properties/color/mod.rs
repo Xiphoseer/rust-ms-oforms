@@ -1,56 +1,151 @@
 mod parser;
+use core::fmt;
+use num_traits::FromPrimitive;
 pub use parser::*;
 use std::convert::TryFrom;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct RgbColor {
-    pub red: u8,
-    pub green: u8,
     pub blue: u8,
+    pub green: u8,
+    pub red: u8,
 }
 
 impl RgbColor {
-    pub fn from_rgb(red: u8, green: u8, blue: u8) -> Self {
+    pub const fn from_rgb(red: u8, green: u8, blue: u8) -> Self {
         Self { red, green, blue }
     }
 
-    pub fn from_bgr(blue: u8, green: u8, red: u8) -> Self {
+    pub const fn from_bgr(blue: u8, green: u8, red: u8) -> Self {
         Self { blue, green, red }
     }
 }
 
-pub type PaletteEntry = u16;
+pub type PaletteIndex = u16;
 
-#[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[allow(dead_code)]
-enum OleColorType {
-    Default = 0x00,
-    PaletteEntry = 0x01,
-    RgbColor = 0x02,
-    SystemPalette = 0x80,
+/// 16-bit integer that may be a valid [`SystemColor`]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SystemPaletteIndex(u16);
+
+impl fmt::Debug for SystemPaletteIndex {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match SystemColor::from_u16(self.0) {
+            Some(s) => <SystemColor as fmt::Debug>::fmt(&s, f),
+            None => f.debug_tuple("SystemPaletteIndex").field(&self.0).finish(),
+        }
+    }
+}
+
+/// Windows System Colors
+///
+/// See: <https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/system-color-constants>
+#[repr(u16)]
+#[derive(Debug, Copy, Clone, FromPrimitive, ToPrimitive, PartialEq, Eq)]
+pub enum SystemColor {
+    /// Scroll bar color
+    ScrollBars = 0x00,
+    /// Desktop color
+    Desktop = 0x01,
+    /// Color of the title bar for the active window
+    ActiveTitleBar = 0x02,
+    /// Color of the title bar for the inactive window
+    InactiveTitleBar = 0x03,
+    /// Menu background color
+    MenuBar = 0x04,
+    /// Window background color
+    WindowBackground = 0x05,
+    /// Window frame color
+    WindowFrame = 0x06,
+    /// Color of text on menus
+    MenuText = 0x07,
+    /// Color of text in windows
+    WindowText = 0x08,
+    /// Color of text in caption, size box, and scroll arrow
+    TitleBarText = 0x09,
+    /// Border color of active window
+    ActiveBorder = 0x0A,
+    /// Border color of inactive window
+    InactiveBorder = 0x0B,
+    /// Background color of multiple-document interface (MDI) applications
+    ApplicationWorkspace = 0x0C,
+    /// Background color of items selected in a control
+    Highlight = 0x0D,
+    /// Text color of items selected in a control
+    HighlightText = 0x0E,
+    /// Color of shading on the face of command buttons
+    ButtonFace = 0x0F,
+    /// Color of shading on the edge of command buttons
+    ButtonShadow = 0x10,
+    /// Grayed (disabled) text
+    GrayText = 0x11,
+    /// Text color on push buttons
+    ButtonText = 0x12,
+    /// Color of text in an inactive caption
+    InactiveCaptionText = 0x13,
+    /// Highlight color for 3-D display elements
+    _3DHighlight = 0x14,
+    /// Darkest shadow color for 3-D display elements
+    _3DDKShadow = 0x15,
+    /// Second lightest 3-D color after vb3DHighlight
+    _3DLight = 0x16,
+    /// Color of text in ToolTips
+    InfoText = 0x17,
+    /// Background color of ToolTips
+    InfoBackground = 0x18,
+}
+
+impl SystemColor {
+    pub const fn as_index(&self) -> SystemPaletteIndex {
+        SystemPaletteIndex(*self as u16)
+    }
+
+    pub const fn as_ole_color(&self) -> OleColor {
+        self.as_index().as_ole_color()
+    }
+}
+
+impl SystemPaletteIndex {
+    pub const fn as_ole_color(&self) -> OleColor {
+        OleColor::SystemPalette(*self)
+    }
+}
+
+impl From<SystemColor> for SystemPaletteIndex {
+    fn from(value: SystemColor) -> Self {
+        value.as_index()
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(u8)]
 pub enum OleColor {
     Default(RgbColor),
-    PaletteEntry(PaletteEntry),
+    PaletteEntry(PaletteIndex),
     RgbColor(RgbColor),
     /// See also:
     ///
     /// - <https://learn.microsoft.com/de-de/windows/win32/api/winuser/nf-winuser-getsyscolor>
     /// - <https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/system-color-constants>
-    SystemPalette(PaletteEntry),
+    SystemPalette(SystemPaletteIndex),
 }
 
 impl OleColor {
-    pub fn from_u32(value: u32) -> Option<Self> {
+    const TAG_DEFAULT: u8 = 0x00;
+    const TAG_PALETTE_ENTRY: u8 = 0x01;
+    const TAG_RGB_COLOR: u8 = 0x02;
+    const TAG_SYSTEM_PALETTE: u8 = 0x80;
+
+    pub const fn from_u32(value: u32) -> Option<Self> {
         let [a, b, c, d] = value.to_le_bytes();
         match d {
-            0x00 => Some(OleColor::Default(RgbColor::from_bgr(a, b, c))),
-            0x01 => Some(OleColor::PaletteEntry(u16::from_le_bytes([a, b]))),
-            0x02 => Some(OleColor::RgbColor(RgbColor::from_bgr(a, b, c))),
-            0x80 => Some(OleColor::SystemPalette(u16::from_le_bytes([a, b]))),
+            Self::TAG_DEFAULT => Some(OleColor::Default(RgbColor::from_bgr(a, b, c))),
+            Self::TAG_PALETTE_ENTRY => {
+                Some(OleColor::PaletteEntry(PaletteIndex::from_le_bytes([a, b])))
+            }
+            Self::TAG_RGB_COLOR => Some(OleColor::RgbColor(RgbColor::from_bgr(a, b, c))),
+            Self::TAG_SYSTEM_PALETTE => Some(OleColor::SystemPalette(SystemPaletteIndex(
+                u16::from_le_bytes([a, b]),
+            ))),
             _ => None,
         }
     }
@@ -65,8 +160,8 @@ impl TryFrom<u32> for OleColor {
 }
 
 impl OleColor {
-    pub const BTNFACE: Self = OleColor::SystemPalette(0x000f);
-    pub const BTNTEXT: Self = OleColor::SystemPalette(0x0012);
+    pub const BTNFACE: Self = SystemColor::ButtonFace.as_ole_color();
+    pub const BTNTEXT: Self = SystemColor::ButtonText.as_ole_color();
 }
 
 #[cfg(test)]
@@ -110,5 +205,10 @@ mod tests {
                 blue: 0,
             })
         );
+    }
+
+    #[test]
+    fn test_size() {
+        assert_eq!(std::mem::size_of::<OleColor>(), 4);
     }
 }
