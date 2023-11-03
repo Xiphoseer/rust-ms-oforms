@@ -148,6 +148,10 @@ impl SystemPaletteIndex {
     pub const fn as_ole_color(&self) -> OleColor {
         OleColor::SystemPalette(*self)
     }
+
+    pub fn as_system_color(&self) -> Option<SystemColor> {
+        SystemColor::from_u16(self.0)
+    }
 }
 
 impl From<SystemColor> for SystemPaletteIndex {
