@@ -4,7 +4,12 @@ use std::{
 };
 
 use argh::FromArgs;
-use ms_oforms::OFormsFile;
+use ms_oforms::{
+    controls::command_button::parse_command_button,
+    properties::{FormEmbeddedActiveXControl, FormEmbeddedActiveXControlCached},
+    OFormsFile,
+};
+use nom::error::VerboseError;
 
 #[derive(FromArgs)]
 /// Parse a VB form
@@ -33,6 +38,16 @@ fn main() -> io::Result<()> {
         let mut buf = Vec::with_capacity(s.limit() as usize);
         s.read_to_end(&mut buf)?;
         println!("{:?} {}", ctrl, buf.len());
+
+        match ctrl {
+            FormEmbeddedActiveXControl::ControlCached(
+                FormEmbeddedActiveXControlCached::CommandButton,
+            ) => {
+                let (_, btn) = parse_command_button::<VerboseError<_>>(&buf).unwrap();
+                println!("{:?}", btn);
+            }
+            _ => {}
+        }
     }
     Ok(())
 }

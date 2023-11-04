@@ -2,8 +2,7 @@
 //!
 //! This section contains specifications of the structure of each control.
 
-/// ## 2.2.1 CommandButton Control
-pub mod command_button {}
+pub mod command_button;
 /// ## 2.2.2 Frame Control
 pub mod frame {}
 /// ## 2.2.3 Image Control
