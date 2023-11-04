@@ -19,7 +19,7 @@ bitflags! {
 }
 
 /// Specifies the structure, as persisted to a stream, of the type information of an embedded ActiveX control.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SiteClassInfo {
     /// A CLSTABLE_FLAGS that specifies Boolean properties of the type information.
     ///

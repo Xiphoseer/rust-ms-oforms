@@ -1,5 +1,5 @@
 use std::{
-    io::{self, BufReader},
+    io::{self, BufReader, Read},
     path::PathBuf,
 };
 
@@ -25,7 +25,14 @@ fn main() -> io::Result<()> {
     let mut oforms = OFormsFile::open_in(reader, opts.form)?;
     let c = oforms.root_comp_obj()?;
     println!("{:?}", c);
-    let f = oforms.root_form()?;
+    let mut f = oforms.root_form()?;
     println!("{:#?}", f.form_control());
+    let mut iter = f.site_iter();
+    while let Some((ctrl, _depth, _control)) = iter.next() {
+        let mut s = iter.site_stream()?;
+        let mut buf = Vec::with_capacity(s.limit() as usize);
+        s.read_to_end(&mut buf)?;
+        println!("{:?} {}", ctrl, buf.len());
+    }
     Ok(())
 }

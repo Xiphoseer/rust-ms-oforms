@@ -9,6 +9,8 @@ pub mod color;
 pub mod font;
 mod parser;
 pub use parser::*;
+
+use crate::controls::user_form::class_table::SiteClassInfo;
 pub mod picture;
 pub mod string;
 
@@ -110,4 +112,30 @@ pub struct Position {
     pub top: SignedHiMetric,
     /// A signed integer that specifies, in HIMETRIC units, a distance to the right of the reference point.
     pub left: SignedHiMetric,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
+pub enum FormEmbeddedActiveXControlCached {
+    Form = 7,
+    Image = 12,
+    Frame = 14,
+    MorphData = 15,
+    SpinButton = 16,
+    CommandButton = 17,
+    TabStrip = 18,
+    Label = 21,
+    TextBox = 23,
+    ListBox = 24,
+    ComboBox = 25,
+    CheckBox = 26,
+    OptionButton = 27,
+    ToggleButton = 28,
+    ScrollBar = 47,
+    MultiPage = 57,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum FormEmbeddedActiveXControl<'a> {
+    ControlCached(FormEmbeddedActiveXControlCached),
+    ControlNonCached(&'a SiteClassInfo),
 }

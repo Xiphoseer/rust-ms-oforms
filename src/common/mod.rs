@@ -58,7 +58,7 @@ bitflags! {
 }
 
 bitflags! {
-    #[derive(Debug, PartialEq, Eq)]
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct VarType : u16 {
         const EMPTY = 0x0000;
         const NULL = 0x0001;

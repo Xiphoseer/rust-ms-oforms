@@ -27,7 +27,8 @@ use controls::user_form::{
     parse_form_control, FormControl, Site, SiteKind,
 };
 use nom::{error::VerboseError, Err};
-use uuid::Uuid;
+use num_traits::FromPrimitive;
+use properties::FormEmbeddedActiveXControl;
 
 #[macro_use]
 extern crate bitflags;
@@ -116,18 +117,29 @@ impl<'a, F> Iterator for SiteIter<'a, F> {
     /// - CLSID of the control
     /// - "depth"
     /// - reference to the OleSiteConcreteControl
-    type Item = (Uuid, u8, &'a OleSiteConcreteControl);
+    type Item = (
+        FormEmbeddedActiveXControl<'a>,
+        u8,
+        &'a OleSiteConcreteControl,
+    );
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(s) = self.sites.next() {
             let SiteKind::Ole(ole_site) = &s.kind;
             self.range = self.range.end..self.range.end + (ole_site.object_stream_size as usize);
-            let clsid = match ole_site.clsid_cache_index {
-                Clsid::ClassTable(c) => self.classes.get(c as usize).unwrap().cls_id,
-                Clsid::Invalid => todo!(),
-                Clsid::Global(_) => todo!(),
+            let ctrl_class = match ole_site.clsid_cache_index {
+                Clsid::ClassTable(c) => FormEmbeddedActiveXControl::ControlNonCached(
+                    self.classes
+                        .get(c as usize)
+                        .expect("missing class table entry"),
+                ),
+                Clsid::Invalid => panic!("invalid clsid_cache_index"),
+                Clsid::Global(idx) => FormEmbeddedActiveXControl::ControlCached(
+                    properties::FormEmbeddedActiveXControlCached::from_u16(idx)
+                        .expect("unexpected clsid cache index"),
+                ),
             };
-            Some((clsid, s.depth, ole_site))
+            Some((ctrl_class, s.depth, ole_site))
         } else {
             None
         }
