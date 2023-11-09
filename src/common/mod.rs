@@ -21,10 +21,12 @@ pub const CLSID_DT_DDSFORM_21_FONT_NEW: Uuid = uuid!("105b80de-95f1-11d0-b0a0-00
 pub const IID_IDISPATCH: Uuid = uuid!("00020400-0000-0000-C000-000000000046");
 
 bitflags! {
-    /// ## [MS-OAUT] VARFLAGS
+    /// ## [MS-OAUT] 2.2.18 VARFLAGS Variable Feature Constants
     ///
     /// The VARFLAGS enumeration values are used in the wVarFlags field of a VARDESC to specify the
     /// features of a field, constant, or ODL dispinterface property, as specified in section 2.2.43.
+    ///
+    /// See: <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-oaut/8ec5cfa4-e710-446a-ab89-6715dece4aec>
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub struct VarFlags: u16 {
         /// MUST be set if the variable is an ODL dispinterface property that was declared with the [readonly] attribute (see section 2.2.49.5.3).
@@ -57,7 +59,7 @@ bitflags! {
 }
 
 bitflags! {
-    /// [MS-OAUT] 2.2.7 VARIANT Type Constants
+    /// ## [MS-OAUT] 2.2.7 VARIANT Type Constants
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     #[doc(alias = "tagVARENUM")]
     pub struct VarType : u16 {
@@ -100,18 +102,20 @@ bitflags! {
     }
 }
 
-/// [MS-OLEDS] 2.3.7 CompObjHeader
+/// ## [MS-OLEDS] 2.3.7 CompObjHeader
 ///
 /// See: <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-oleds/5f368864-fdeb-4865-b298-67289f3c4e8e>
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct CompObjHeader;
+#[non_exhaustive]
+pub struct CompObjHeader {}
 
-/// [MS-OLEDS] 2.3.8 CompObjStream
+/// ## [MS-OLEDS] 2.3.8 CompObjStream
 ///
 /// See: <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-oleds/142e0420-2f74-4ed9-829b-0b3d5a684d01>
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct CompObj {
+    pub header: CompObjHeader,
     pub ansi_user_type: CString,
     pub ansi_clipboard_format: ClipboardFormat,
 }

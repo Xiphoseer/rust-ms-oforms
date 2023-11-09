@@ -10,7 +10,8 @@ use uuid::Uuid;
 use std::cell::Cell;
 use std::ffi::{CStr, FromBytesWithNulError};
 
-pub fn check_guid<'a>(guid: Uuid) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], Uuid> {
+/// Parse a GUID and [`verify`] that it is a specific value
+pub fn tag_guid<'a>(guid: Uuid) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], Uuid> {
     verify(parse_guid, move |x| x == &guid)
 }
 
@@ -152,7 +153,7 @@ fn parse_comp_obj_header<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], CompObjHea
 where
     E: ParseError<&'a [u8]>,
 {
-    value(CompObjHeader, take(28usize))(input)
+    value(CompObjHeader {}, take(28usize))(input)
 }
 
 fn parse_length_prefixed_ansi_string<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], &'a CStr, E>
@@ -184,12 +185,13 @@ where
     E: ParseError<&'a [u8]>,
     E: FromExternalError<&'a [u8], FromBytesWithNulError>,
 {
-    let (input, _header) = parse_comp_obj_header(input)?;
+    let (input, header) = parse_comp_obj_header(input)?;
     let (input, ansi_user_type) = map(parse_length_prefixed_ansi_string, CStr::to_owned)(input)?;
     let (input, ansi_clipboard_format) = parse_ansi_clipboard_format(input)?;
     Ok((
         input,
         CompObj {
+            header,
             ansi_user_type,
             ansi_clipboard_format,
         },
@@ -216,7 +218,7 @@ mod tests {
         let fmt = CStr::from_bytes_with_nul(b"Embedded Object\0").unwrap();
         assert_eq!(
             parse_comp_obj_header::<nom::error::Error<_>>(DATA).ok(),
-            Some((&DATA[28..], CompObjHeader)),
+            Some((&DATA[28..], CompObjHeader {})),
         );
         assert_eq!(
             parse_length_prefixed_ansi_string::<nom::error::Error<_>>(&DATA[28..]).ok(),
@@ -232,6 +234,7 @@ mod tests {
             Some((
                 &DATA[75..],
                 CompObj {
+                    header: CompObjHeader {},
                     ansi_user_type: user_type.to_owned(),
                     ansi_clipboard_format: ClipboardFormat::Custom(fmt.to_owned()),
                 }
