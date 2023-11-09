@@ -9,8 +9,6 @@ use nom::number::complete::le_u16;
 use nom::sequence::preceded;
 use nom::IResult;
 
-use std::cell::Cell;
-
 pub fn parse_ole_site_concrete_header<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], u16, E>
 where
     E: ParseError<&'a [u8]>,
@@ -18,7 +16,7 @@ where
     preceded(tag([0x00, 0x00]), le_u16)(input)
 }
 
-pub trait AlignedOleSiteParser: AlignedParser {
+impl AlignedParser {
     fn parse_cobwcf<'a, E>(
         &self,
         input: &'a [u8],
@@ -164,8 +162,6 @@ pub trait AlignedOleSiteParser: AlignedParser {
     }
 }
 
-impl<T> AlignedOleSiteParser for T where T: AlignedParser {}
-
 pub fn parse_ole_site_concrete<'a, E>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], OleSiteConcreteControl, E>
@@ -183,7 +179,7 @@ where
     E: ParseError<&'a [u8]>,
     E: ContextError<&'a [u8]>,
 {
-    let ap = Cell::new(0);
+    let ap = AlignedParser::new();
     let _i = input;
 
     // Mask

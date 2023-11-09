@@ -1,7 +1,5 @@
 //! ## 2.2.1 CommandButton Control
 
-use std::cell::Cell;
-
 use nom::{
     bytes::complete::tag,
     combinator::map_opt,
@@ -12,7 +10,7 @@ use nom::{
     IResult,
 };
 
-use crate::properties::color::{AlignedColorParser, OleColor};
+use crate::{common::AlignedParser, properties::color::OleColor};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CommandButtonControl {
@@ -68,7 +66,7 @@ where
     E: FromExternalError<&'a [u8], u32>,
 {
     let (input, mask) = map_opt(le_u32, CommandButtonPropMask::from_bits)(input)?;
-    let ap = Cell::new(0usize);
+    let ap = AlignedParser::new();
 
     let (input, fore_color) = match mask.contains(CommandButtonPropMask::FORE_COLOR) {
         true => ap.ole_color(input)?,

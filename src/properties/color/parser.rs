@@ -15,8 +15,8 @@ where
 }
 
 /// Trait to parse a color
-pub trait AlignedColorParser: AlignedParser {
-    fn ole_color<'a, E>(&self, input: &'a [u8]) -> IResult<&'a [u8], OleColor, E>
+impl AlignedParser {
+    pub(crate) fn ole_color<'a, E>(&self, input: &'a [u8]) -> IResult<&'a [u8], OleColor, E>
     where
         E: ParseError<&'a [u8]>,
         E: FromExternalError<&'a [u8], u32>,
@@ -27,6 +27,3 @@ pub trait AlignedColorParser: AlignedParser {
         Ok((input, x))
     }
 }
-
-// Default implementation
-impl<T> AlignedColorParser for T where T: AlignedParser {}

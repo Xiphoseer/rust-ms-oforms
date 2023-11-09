@@ -17,15 +17,13 @@ use crate::common::{parse_guid, AlignedParser, VarFlags, VarType, CLSID_DEFAULT}
 use crate::properties::font::GuidAndFont;
 use crate::properties::picture::GuidAndPicture;
 use crate::properties::{
-    color::{AlignedColorParser, OleColor},
+    color::OleColor,
     font::parse_guid_and_font,
     string::{parse_string, stream::CountOfBytesWithCompressionFlag},
 };
 use crate::properties::{
     MousePointer, PictureAlignment, PictureSizeMode, Position, Size, SpecialEffect,
 };
-
-use std::cell::Cell;
 
 pub fn parse_form_control_header<'a, E: ParseError<&'a [u8]>>(
     input: &'a [u8],
@@ -44,7 +42,7 @@ pub fn parse_site_class_info<'a, E>(input: &'a [u8]) -> IResult<&'a [u8], SiteCl
 where
     E: ParseError<&'a [u8]>,
 {
-    let ap = Cell::new(0);
+    let ap = AlignedParser::new();
     let _i = input;
 
     // Class Header
@@ -182,9 +180,7 @@ where
     ))
 }
 
-impl<T> AlignedFormClassParser for T where T: AlignedParser {}
-
-pub trait AlignedFormClassParser: AlignedParser {
+impl AlignedParser {
     fn parse_form_object_depth_type_count<'a, E>(
         &self,
         input: &'a [u8],
@@ -222,7 +218,7 @@ where
     E: ParseError<&'a [u8]>,
 {
     move |input: &'a [u8]| {
-        let ap = Cell::new(0);
+        let ap = AlignedParser::new();
 
         let mut site_count: u32 = 0;
         let ucount = count_of_sites as usize;
@@ -273,7 +269,7 @@ where
     E: FromExternalError<&'a [u8], u32>,
     E: ContextError<&'a [u8]>,
 {
-    let ap = Cell::new(0usize);
+    let ap = AlignedParser::new();
     let _i = input;
 
     // Form Control Header
