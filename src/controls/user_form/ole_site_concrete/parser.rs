@@ -154,6 +154,7 @@ pub trait AlignedOleSiteParser: AlignedParser {
         E: ParseError<&'a [u8]>,
     {
         if mask.contains(flag) {
+            let (input, _) = self.align(input, 4)?;
             let (input, position) = Position::parse(input)?;
             self.inc(8);
             Ok((input, position))
