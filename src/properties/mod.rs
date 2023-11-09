@@ -162,3 +162,16 @@ pub enum FormEmbeddedActiveXControl<'a> {
     ControlCached(FormEmbeddedActiveXControlCached),
     ControlNonCached(&'a SiteClassInfo),
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Position;
+
+    #[test]
+    fn test_position() {
+        assert_eq!(
+            Position::parse::<nom::error::Error<_>>(&[10, 0, 0, 0, 5, 0, 0, 0]),
+            Ok((&[][..], Position { left: 10, top: 5 }))
+        );
+    }
+}
