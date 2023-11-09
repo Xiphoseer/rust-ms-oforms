@@ -166,6 +166,8 @@ pub enum FormEmbeddedActiveXControl<'a> {
 
 #[cfg(test)]
 mod tests {
+    use crate::properties::{HiMetric, SignedHiMetric, Size};
+
     use super::Position;
 
     #[test]
@@ -174,5 +176,21 @@ mod tests {
             Position::parse::<nom::error::Error<_>>(&[10, 0, 0, 0, 5, 0, 0, 0]),
             Ok((&[][..], Position { left: 10, top: 5 }))
         );
+    }
+
+    #[test]
+    fn test_struct_alignment() {
+        assert_eq!(std::mem::align_of::<Position>(), 4);
+        assert_eq!(std::mem::align_of::<Size>(), 4);
+        assert_eq!(std::mem::align_of::<HiMetric>(), 4);
+        assert_eq!(std::mem::align_of::<SignedHiMetric>(), 4);
+    }
+
+    #[test]
+    fn test_struct_size() {
+        assert_eq!(std::mem::size_of::<Position>(), 8);
+        assert_eq!(std::mem::size_of::<Size>(), 8);
+        assert_eq!(std::mem::size_of::<HiMetric>(), 4);
+        assert_eq!(std::mem::size_of::<SignedHiMetric>(), 4);
     }
 }

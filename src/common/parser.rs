@@ -115,13 +115,17 @@ impl AlignedParser for Cell<usize> {
         input: &'a [u8],
         align: usize,
     ) -> IResult<&'a [u8], usize, E> {
-        let p0 = self.get();
-        let p1 = p0 % align;
-        let p2 = if p1 == 0 { 0 } else { align - p1 };
-        let (rest, _pad) = take(p2)(input)?;
-        let p3 = p0 + p2;
-        self.set(p3);
-        Ok((rest, p3))
+        let pad_from = self.get();
+        let offset = pad_from % align;
+        if offset == 0 {
+            Ok((input, pad_from))
+        } else {
+            let skip = align - offset;
+            let (input, _pad) = take(skip)(input)?;
+            let pad_end = pad_from + skip;
+            self.set(pad_end);
+            Ok((input, pad_end))
+        }
     }
 
     fn inc(&self, by: usize) {
