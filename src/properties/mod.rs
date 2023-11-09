@@ -95,6 +95,7 @@ pub enum PictureSizeMode {
 pub type HiMetric = u32;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[doc(alias = "fmSize")]
 /// Specifies a pair of signed integers that specify the size of a control.
 pub struct Size {
     /// A signed integer that specifies the width, in HIMETRIC units, of the control.
