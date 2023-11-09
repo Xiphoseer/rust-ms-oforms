@@ -103,15 +103,38 @@ pub struct Size {
     pub height: HiMetric,
 }
 
+impl Size {
+    pub const fn new(width: HiMetric, height: HiMetric) -> Self {
+        Self { width, height }
+    }
+}
+
 pub type SignedHiMetric = i32;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
+#[doc(alias = "fmPosition")]
 /// Specifies a pair of signed integers that specify a position relative to a reference point.
+///
+/// Definition: [2.4.1 fmPosition](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-oforms/73c3866f-bbac-4f45-ba70-645fd046bfdf)
+///
+/// **Note**: The MS-OFORMS spec has the field order reversed for all versions up to and including
+/// 7.0. To quote from the relevant Q&A:
+///
+/// > The fmPosition struct matches the Windows API [`POINT`] structure (x then y)  
+/// > &mdash; <https://learn.microsoft.com/en-us/answers/questions/1414725/are-the-fields-in-ms-oforms-in-fmposition-swapped>
+///
+/// [`POINT`]: https://learn.microsoft.com/en-us/windows/win32/api/windef/ns-windef-point
 pub struct Position {
-    /// A signed integer that specifies, in HIMETRIC units, a distance below the reference point.
-    pub top: SignedHiMetric,
     /// A signed integer that specifies, in HIMETRIC units, a distance to the right of the reference point.
     pub left: SignedHiMetric,
+    /// A signed integer that specifies, in HIMETRIC units, a distance below the reference point.
+    pub top: SignedHiMetric,
+}
+
+impl Position {
+    pub fn new(left: SignedHiMetric, top: SignedHiMetric) -> Self {
+        Self { left, top }
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]

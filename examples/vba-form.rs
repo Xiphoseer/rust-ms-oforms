@@ -39,14 +39,12 @@ fn main() -> io::Result<()> {
         s.read_to_end(&mut buf)?;
         println!("{:?} {}", ctrl, buf.len());
 
-        match ctrl {
-            FormEmbeddedActiveXControl::ControlCached(
-                FormEmbeddedActiveXControlCached::CommandButton,
-            ) => {
-                let (_, btn) = parse_command_button::<VerboseError<_>>(&buf).unwrap();
-                println!("{:?}", btn);
-            }
-            _ => {}
+        if let FormEmbeddedActiveXControl::ControlCached(
+            FormEmbeddedActiveXControlCached::CommandButton,
+        ) = ctrl
+        {
+            let (_, btn) = parse_command_button::<VerboseError<_>>(&buf).unwrap();
+            println!("{:?}", btn);
         }
     }
     Ok(())

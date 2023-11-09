@@ -7,12 +7,11 @@ use std::{
     fmt::Debug,
 };
 
-//#[derive(Copy, Clone, PartialEq, Eq)]
-//pub struct Uuid(pub u32, pub u16, pub u16, pub u64);
-
 /// {0BE35203-8F91-11CE-9DE3-00AA004BB851}
 pub const CLSID_STD_FONT: Uuid = uuid!("0BE35203-8F91-11CE-9DE3-00AA004BB851");
 /// {AFC20920-DA4E-11CE-B943-00AA006887B4}
+///
+/// See also: <https://learn.microsoft.com/en-us/dotnet/api/microsoft.vbe.interop.forms.newfontclass>
 pub const CLSID_TEXT_PROPS: Uuid = uuid!("AFC20920-DA4E-11CE-B943-00AA006887B4");
 /// {0BE35204-8F91-11CE-9DE3-00AA004BB851}
 pub const CLSID_STD_PICTURE: Uuid = uuid!("0BE35204-8F91-11CE-9DE3-00AA004BB851");

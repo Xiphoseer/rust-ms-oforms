@@ -1,6 +1,10 @@
 //! ## 2.2 Control Structures
 //!
 //! This section contains specifications of the structure of each control.
+//!
+//! See also:
+//! - <https://github.com/LibreOffice/core/blob/master/include/oox/ole/axcontrol.hxx>
+//! - <https://learn.microsoft.com/en-us/dotnet/api/microsoft.vbe.interop.forms>
 
 pub mod command_button;
 /// ## 2.2.2 Frame Control

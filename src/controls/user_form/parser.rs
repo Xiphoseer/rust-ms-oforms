@@ -19,7 +19,6 @@ use crate::properties::picture::GuidAndPicture;
 use crate::properties::{
     color::{AlignedColorParser, OleColor},
     font::parse_guid_and_font,
-    parse_position, parse_size,
     string::{parse_string, stream::CountOfBytesWithCompressionFlag},
 };
 use crate::properties::{
@@ -430,41 +429,29 @@ where
 
     // Displayed Size
     let (_i, displayed_size) = if mask.contains(FormPropMask::DISPLAYED_SIZE) {
-        let (_ir, displayed_size) = parse_size(_i)?;
+        let (_ir, displayed_size) = Size::parse(_i)?;
         ap.inc(8);
         (_ir, displayed_size)
     } else {
-        (
-            _i,
-            Size {
-                width: 4000,
-                height: 3000,
-            },
-        )
+        (_i, Size::new(4000, 3000))
     };
 
     // Logical Size
     let (_i, logical_size) = if mask.contains(FormPropMask::LOGICAL_SIZE) {
-        let (_ir, logical_size) = parse_size(_i)?;
+        let (_ir, logical_size) = Size::parse(_i)?;
         ap.inc(8);
         (_ir, logical_size)
     } else {
-        (
-            _i,
-            Size {
-                width: 4000,
-                height: 3000,
-            },
-        )
+        (_i, Size::new(4000, 3000))
     };
 
     // Scroll Position
     let (_i, scroll_position) = if mask.contains(FormPropMask::SCROLL_POSITION) {
-        let (_ir, scroll_position) = parse_position(_i)?;
+        let (_ir, scroll_position) = Position::parse(_i)?;
         ap.inc(8);
         (_ir, scroll_position)
     } else {
-        (_i, Position { top: 0, left: 0 })
+        (_i, Position::default())
     };
 
     // Caption

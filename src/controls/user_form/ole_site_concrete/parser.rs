@@ -154,9 +154,9 @@ pub trait AlignedOleSiteParser: AlignedParser {
         E: ParseError<&'a [u8]>,
     {
         if mask.contains(flag) {
-            let (input, top) = self.le_i32(input)?;
-            let (input, left) = self.le_i32(input)?;
-            Ok((input, Position { top, left }))
+            let (input, position) = Position::parse(input)?;
+            self.inc(8);
+            Ok((input, position))
         } else {
             Ok((input, Position { top: 0, left: 0 }))
         }
