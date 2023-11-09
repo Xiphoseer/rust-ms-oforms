@@ -13,7 +13,7 @@ use super::{
     stream::*, BorderStyle, ClsTableFlags, Cycle, FormControl, FormFlags, FormScrollBarFlags, Site,
     SiteClassInfo, SiteKind,
 };
-use crate::common::{parse_guid, AlignedParser, VarFlags, VarType, CLSID_DEFAULT};
+use crate::common::{parse_guid, AlignedParser, VarFlags, VarType, IID_IDISPATCH};
 use crate::properties::font::GuidAndFont;
 use crate::properties::picture::GuidAndPicture;
 use crate::properties::{
@@ -148,14 +148,14 @@ where
     let (_i, disp_event) = if mask.contains(ClassInfoPropMask::DISP_EVENT) {
         parse_guid(_i)?
     } else {
-        (_i, CLSID_DEFAULT)
+        (_i, IID_IDISPATCH)
     };
 
     // Default Proc
     let (_i, default_proc) = if mask.contains(ClassInfoPropMask::DEFAULT_PROC) {
         parse_guid(_i)?
     } else {
-        (_i, CLSID_DEFAULT)
+        (_i, IID_IDISPATCH)
     };
 
     Ok((

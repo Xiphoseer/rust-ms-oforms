@@ -7,18 +7,18 @@ use std::{
     fmt::Debug,
 };
 
-/// {0BE35203-8F91-11CE-9DE3-00AA004BB851}
+/// `{0BE35203-8F91-11CE-9DE3-00AA004BB851}` StdFont
 pub const CLSID_STD_FONT: Uuid = uuid!("0BE35203-8F91-11CE-9DE3-00AA004BB851");
-/// {AFC20920-DA4E-11CE-B943-00AA006887B4}
+/// `{AFC20920-DA4E-11CE-B943-00AA006887B4}` TextProps / NewFont
 ///
 /// See also: <https://learn.microsoft.com/en-us/dotnet/api/microsoft.vbe.interop.forms.newfontclass>
 pub const CLSID_TEXT_PROPS: Uuid = uuid!("AFC20920-DA4E-11CE-B943-00AA006887B4");
-/// {0BE35204-8F91-11CE-9DE3-00AA004BB851}
+/// `{0BE35204-8F91-11CE-9DE3-00AA004BB851}` StdPicture
 pub const CLSID_STD_PICTURE: Uuid = uuid!("0BE35204-8F91-11CE-9DE3-00AA004BB851");
-/// Microsoft DT DDSform 2.1 FontNew `{105b80de-95f1-11d0-b0a0-00aa00bdcb5c}`
+/// `{105b80de-95f1-11d0-b0a0-00aa00bdcb5c}` Microsoft DT DDSform 2.1 FontNew
 pub const CLSID_DT_DDSFORM_21_FONT_NEW: Uuid = uuid!("105b80de-95f1-11d0-b0a0-00aa00bdcb5c");
-/// {00020400-0000-0000-C000-000000000046}
-pub const CLSID_DEFAULT: Uuid = uuid!("00020400-0000-0000-C000-000000000046");
+/// `{00020400-0000-0000-C000-000000000046}` IDispatch
+pub const IID_IDISPATCH: Uuid = uuid!("00020400-0000-0000-C000-000000000046");
 
 bitflags! {
     /// ## [MS-OAUT] VARFLAGS
@@ -57,7 +57,9 @@ bitflags! {
 }
 
 bitflags! {
+    /// [MS-OAUT] 2.2.7 VARIANT Type Constants
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    #[doc(alias = "tagVARENUM")]
     pub struct VarType : u16 {
         const EMPTY = 0x0000;
         const NULL = 0x0001;
@@ -98,13 +100,20 @@ bitflags! {
     }
 }
 
+/// [MS-OLEDS] 2.3.7 CompObjHeader
+///
+/// See: <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-oleds/5f368864-fdeb-4865-b298-67289f3c4e8e>
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct CompObjHeader;
 
+/// [MS-OLEDS] 2.3.8 CompObjStream
+///
+/// See: <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-oleds/142e0420-2f74-4ed9-829b-0b3d5a684d01>
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub struct CompObj {
-    ansi_user_type: CString,
-    ansi_clipboard_format: ClipboardFormat,
+    pub ansi_user_type: CString,
+    pub ansi_clipboard_format: ClipboardFormat,
 }
 
 /// Clipboard formats
